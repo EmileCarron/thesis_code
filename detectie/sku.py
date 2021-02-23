@@ -8,8 +8,6 @@ from skimage import io
 import numpy as np
 from PIL import Image
 import cv2
-import crop
-from crop import RandomCrop
 
 
   
@@ -129,7 +127,7 @@ class Sku(Dataset):
         image = torch.from_numpy(image)
         image = image.float()
         image = image/255
-        #print(image.shape)
+        print(image)
         #print(image.type)
         image = image[0:3, 0:256, 0:256]
         #print(image.shape)
@@ -141,10 +139,10 @@ class Sku(Dataset):
 
         
 # Driver code
-#train_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/images')
+train_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '../../../datasets/sku110k/images')
 
-#train_set[0]
-#train_set[1000]
-#train_set[100000]
+train_set[0]
+train_set[1000]
+train_set[100000]
 
 
