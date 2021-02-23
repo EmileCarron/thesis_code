@@ -15,7 +15,7 @@ import cv2
 
 
 class Rescale(object):
-    """Rescale the image in a sample to a given size.
+    """Rescalae the image in a sample to a given size.
 
     Args:
         output_size (tuple or int): Desired output size. If tuple, output is
