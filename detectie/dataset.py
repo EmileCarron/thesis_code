@@ -54,7 +54,7 @@ if __name__ == '__main__':
     model = LitAutoEncoder()
 
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0,
-                        max_epochs=10,)
+                        max_epochs=10)
     trainer.fit(model, train, val)
 
 
