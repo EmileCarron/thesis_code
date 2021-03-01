@@ -8,66 +8,10 @@ from skimage import io
 import numpy as np
 from PIL import Image
 import cv2
+from torchvision.transforms import ToTensor
 
-
-  
-
-
-
-class Rescale(object):
-    """Rescalae the image in a sample to a given size.
-
-    Args:
-        output_size (tuple or int): Desired output size. If tuple, output is
-            matched to output_size. If int, smaller of image edges is matched
-            to output_size keeping aspect ratio the same.
-    """
-
-    def __init__(self, output_size=256):
-        assert isinstance(output_size, (int, tuple))
-        self.output_size = output_size
-
-    def take(self, sample):
-        image, boundingbox = sample['image'], sample['boundingbox']
-
-        h, w = image.shape[:2]
-        if isinstance(self.output_size, int):
-            if h > w:
-                new_h, new_w = self.output_size * h / w, self.output_size
-            else:
-                new_h, new_w = self.output_size, self.output_size * w / h
-        else:
-            new_h, new_w = self.output_size
-
-        new_h, new_w = int(new_h), int(new_w)
-
-        img = transform.resize(image, (new_h, new_w))
-
-        # h and w are swapped for landmarks because for images,
-        # x and y axes are axis 1 and 0 respectively
-        boundingbox = boundingbox * [new_w / w, new_h / h]
-
-        return {'image': img, 'boundingbox': boundingbox}
-
-
-
-
-class ToTensor(object):
-    """Convert ndarrays in sample to Tensors."""
-
-    def __call__(self, sample):
-        image, landmarks = sample['image'], sample['boundingbox']
-
-        # swap color axis because
-        # numpy image: H x W x C
-        # torch image: C X H X W
-        image = image.transpose((2, 0, 1))
-        image = torch.from_numpy(image)
-        image = image.double()
-        image = image/255
-        return {'image': torch.from_numpy(image),
-                'boundingbox': torch.from_numpy(boundingbox)}
-  
+COLUMN_NAMES = ['image_name', 'x1', 'y1', 'x2', 'y2', 'class', 'image_width',
+                'image_height']
   
 class Sku(Dataset):
       
@@ -75,68 +19,43 @@ class Sku(Dataset):
     # of the object passed as well
     # as the object item
     def __init__(self,csv_file, root_dir, transform=None):
-        self.annotations = pd.read_csv(csv_file)
+        self.df = pd.read_csv(csv_file, names=COLUMN_NAMES)
         self.root_dir = root_dir
         self.transform = transform
+        groupby = list(self.df.groupby(['image_name',
+                                   'image_width',
+                                   'image_height']))
+        self.images = [
+            image_name
+            for (image_name, _, _), group
+            in groupby
+        ]
+
+        self.targets = [
+            {
+            "boxes": group[['x1', 'y1', 'x2', 'y2']].values,
+            "labels": np.array([0]*len(group))
+            }
+            for (image_name, width, height), group
+            in groupby]
     
     def __len__(self):
-        return len(self.annotations)
+        return len(self.images)
     
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
             
-        img_name = os.path.join(self.root_dir, self.annotations.iloc[idx, 0])
-        #print(img_name)
-        image = io.imread(img_name)
+        img_name = os.path.join(self.root_dir, self.images[idx])
+        image = Image.open(img_name)
+        target = self.targets[idx]
         
-        output_size = 256
-
-        h, w = image.shape[:2]
-        if isinstance(output_size, int):
-            if h > w:
-                new_h, new_w = output_size * h / w, output_size
-            else:
-                new_h, new_w = output_size, output_size * w / h
+        if(self.transform is not None):
+            image, target = self.transform(image, target)
         else:
-            new_h, new_w = output_size
-
-        new_h, new_w = int(new_h), int(new_w)
-        img = cv2.resize(image, (new_h, new_w))
-
-
-    # h and w are swapped for landmarks because for images,
-    # x and y axes are axis 1 and 0 respectively
-        
-        #print(type(image))
-        boundingbox = self.annotations.iloc[idx,1:5]
-        #print(boundingbox[1])
-        boundingbox = np.array([boundingbox])
-        boundingbox = boundingbox.astype('float').reshape(-1, 2)
-        boundingbox = boundingbox * [new_w / w, new_h / h]
-        sample = {'image': img, 'boundingbox': boundingbox}
-        
-        
-        
-        image, boundingbox = sample['image'], sample['boundingbox']
-
-            # swap color axis because
-            # numpy image: H x W x C
-            # torch image: C X H X W
-        image = image.transpose((2, 0, 1))
-        image = torch.from_numpy(image)
-        image = image.float()
-        image = image/255
-        print(image)
-        #print(image.type)
-        image = image[0:3, 0:256, 0:256]
-        #print(image.shape)
-        sample =  {'image': image, 'boundingbox': torch.from_numpy(boundingbox)}
-
-        #print(sample['image'][0])
-        return (sample)
-        
-
+            image = ToTensor()(image)
+    
+        return image, target
         
 # Driver code
 #train_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '../../../datasets/sku110k/images')

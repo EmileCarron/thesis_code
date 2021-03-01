@@ -46,10 +46,12 @@ if __name__ == '__main__':
     train_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/images')
     val_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef//Tutorial/5/SKU110K_fixed/annotations/annotations_val.csv',root_dir = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/images')
 
+    train_set, train_over = torch.utils.data.random_split(train_set, [1000, 1207481])
+    val_set, val_over = torch.utils.data.random_split(val_set, [1000, 89967])
     #print(train_set[0]['image'])
 
-    train= DataLoader(train_set, batch_size=12, num_workers=4)
-    val = DataLoader(val_set, batch_size=12, num_workers=4)
+    train= DataLoader(train_set, batch_size=12)#, num_workers=4)
+    val = DataLoader(val_set, batch_size=12)#, num_workers=4)
 
     model = LitAutoEncoder()
 
