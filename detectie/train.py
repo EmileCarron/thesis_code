@@ -16,8 +16,12 @@ def main(args=None):
     train_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/images')
     val_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef//Tutorial/5/SKU110K_fixed/annotations/annotations_val.csv',root_dir = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/images')
     
+    print(len(train_set))
     
-    #print(len(val_set))
+    train_set, train2 = torch.utils.data.random_split(train_set, [1000, 7219])
+    
+    
+    
     train= DataLoader(train_set, batch_size=1, num_workers=0)
     val = DataLoader(val_set, batch_size=1, num_workers=0)
     
