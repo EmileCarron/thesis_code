@@ -46,7 +46,11 @@ class BBtrans(Dataset):
             if newy2 >= 300:
                 newy2 = 300
             
-            
+            if newy2 == newy1:
+                newy1 = newy1 - 0.1
+                
+            if newx2 == newx1:
+                newx1 = newx1 - 0.1
                 
             x[0] = newx1
             x[1] = newy1
