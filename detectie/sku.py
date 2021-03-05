@@ -11,6 +11,7 @@ import cv2
 from torchvision.transforms import ToTensor
 from torchvision.transforms import Resize
 from torchvision.transforms import RandomResizedCrop
+from torchvision.transforms import Scale
 
 COLUMN_NAMES = ['image_name', 'x1', 'y1', 'x2', 'y2', 'class', 'image_width',
                 'image_height']
@@ -56,6 +57,8 @@ class Sku(Dataset):
             image, target = self.transform(image, target)
         else:
             image = ToTensor()(image)
+            image = Resize(300,2)(image)
+            #target = Resize(300,2)(target)
             image = RandomResizedCrop(300)(image)
             #image = Resize(300,2)(image)
     
