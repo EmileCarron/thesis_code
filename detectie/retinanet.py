@@ -7,7 +7,7 @@ import torchvision
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from torch.optim import SGD
-from .sku import Sku
+from sku import Sku
 
 
 class RetinaNetLightning(pl.LightningModule):

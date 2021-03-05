@@ -9,20 +9,17 @@ from torch.utils.data import DataLoader
 from torch.optim import SGD
 import sku
 from sku import Sku
-import .retinanet
-from .retinanet import RetinaNetLightning
+from retinanet import RetinaNetLightning
 
 def main(args=None):
 
     train_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/images')
     val_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef//Tutorial/5/SKU110K_fixed/annotations/annotations_val.csv',root_dir = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/images')
     
-    train_set, train_over = torch.utils.data.random_split(train_set, [10000, 1198481])
-    val_set, val_over = torch.utils.data.random_split(val_set, [10000, 80967])
     
     #print(len(val_set))
-    train= DataLoader(train_set, batch_size=12, num_workers=4)
-    val = DataLoader(val_set, batch_size=12, num_workers=4)
+    train= DataLoader(train_set, batch_size=1, num_workers=0)
+    val = DataLoader(val_set, batch_size=1, num_workers=0)
     
     model = RetinaNetLightning()
     
