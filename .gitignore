@@ -3,3 +3,4 @@
 /detectie/lightning_logs
 debug.py
 .*
+/detectie/__pycache__/*
