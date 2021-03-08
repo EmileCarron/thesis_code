@@ -22,8 +22,8 @@ def main(args=None):
     
     
     
-    train= DataLoader(train_set, batch_size=1, num_workers=12)
-    val = DataLoader(val_set, batch_size=1, num_workers=12)
+    train= DataLoader(train_set, batch_size=1, num_workers=0)
+    val = DataLoader(val_set, batch_size=1, num_workers=0)
     
     model = RetinaNetLightning()
     
