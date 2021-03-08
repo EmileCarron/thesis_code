@@ -27,7 +27,7 @@ def main(args=None):
     
     model = RetinaNetLightning()
     
-    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=10)
+    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=2)
     trainer.fit(model, train, val)
 
 if __name__ == '__main__':
