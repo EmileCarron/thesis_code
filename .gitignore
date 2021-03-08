@@ -1,1 +1,5 @@
 /__pycache__
+/detectie/__pycache__
+/detectie/lightning_logs
+debug.py
+.*
