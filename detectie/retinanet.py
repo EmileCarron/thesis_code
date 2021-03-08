@@ -29,7 +29,7 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
-        return losses['classification'] + losses['bbox_regression']
+        self.log('valid_loss', losses)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
