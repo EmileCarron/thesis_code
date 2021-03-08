@@ -29,5 +29,5 @@ def main(arguments):
 
 if __name__ == '__main__':
     print("Num_workers: " + sys.argv[1])
-    print("Max_epochs: " + sys.argv[2])
+    print("Max_epochs nick: " + sys.argv[2])
     main(sys.argv)
