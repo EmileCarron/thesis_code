@@ -26,6 +26,8 @@ def main(arguments):
     
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=int(arguments[2]))
     trainer.fit(model, train, val)
+    
+    
 
 if __name__ == '__main__':
     print("Num_workers: " + sys.argv[1])
