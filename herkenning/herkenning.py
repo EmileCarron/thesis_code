@@ -14,11 +14,12 @@ class HerkenningsModel(pl.LightningModule):
         super().__init__()
         self.model = torchvision.models.resnet18(pretrained=True)
 
-    def forward(self, x):
-        return self.model(x)
+   # def forward(self, batch, batch_idx):
+   #     x = batch
+    #    return self.model(x)
         
-    def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
-        return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
+    #def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
+      #  return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
 
     def training_step(self, batch, batch_nb):
         x, y = batch
