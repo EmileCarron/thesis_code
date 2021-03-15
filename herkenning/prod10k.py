@@ -36,7 +36,6 @@ class Prod10k(Dataset):
             
         img_name = os.path.join(self.root_dir, self.df[idx])
         image = Image.open(img_name)
-        target = self.targets[idx]
         
         if(self.transform is not None):
             image, target = self.transform(image, target)
@@ -47,7 +46,7 @@ class Prod10k(Dataset):
 
             image = RandomResizedCrop(300)(image)
     
-        return image, target
+        return image
         
 # Driver code
 #train_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '../../../datasets/sku110k/images')
