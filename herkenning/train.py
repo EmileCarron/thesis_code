@@ -7,8 +7,8 @@ import torchvision
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from torch.optim import SGD
-import Prod10k
-from Prod10k import Prod10k
+import prod10k
+from prod10k import Prod10k
 from retinanet import RetinaNetLightning
 import sys
 
