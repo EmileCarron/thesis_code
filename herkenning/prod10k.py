@@ -25,21 +25,13 @@ class Prod10k(Dataset):
         self.df = pd.read_csv(csv_file, names=COLUMN_NAMES)
         self.root_dir = root_dir
         self.transform = transform
-        groupby = list(self.df.groupby(['image_name',
-                                   'image_width',
-                                   'image_height']))
+        groupby = list(self.df.groupby(['image_name']))
         self.images = [
             image_name
             for (image_name, _, _), group
             in groupby
         ]
 
-        self.targets = [
-            {
-            "class": np.array([0]*len(group))
-            }
-            for (image_name, width, height), group
-            in groupby]
     
     def __len__(self):
         return len(self.images)
