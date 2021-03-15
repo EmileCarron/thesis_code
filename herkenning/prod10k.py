@@ -26,12 +26,9 @@ class Prod10k(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         groupby = list(self.df.groupby(['image_name']))
-
-       
-
     
-    def __len__(self):
-        return len(self.images)
+    def __len__(self,images):
+        return len(images)
     
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
