@@ -13,8 +13,8 @@ import sys
 
 def main(arguments):
 
-    train_set = Prod10k(csv_file = '../../../Dataset/Products10k/train.csv',root_dir = '../../../Dataset/Products10k/train')
-    #val_set = Prod10k(csv_file = '../../../DatasetProducts10k/val.csv',root_dir = '../../../Dataset/Products10k/train')
+    train_set = Prod10k(csv_file = '../../../dataset/Products10k/train.csv',root_dir = '../../../dataset/Products10k/train/')
+    #val_set = Prod10k(csv_file = '../../../dataset/Products10k/val.csv',root_dir = '../../../dataset/Products10k/train')
     print(len(train_set))
     train_set, val_set = torch.utils.data.random_split(train_set, [1000, 7219])
     
