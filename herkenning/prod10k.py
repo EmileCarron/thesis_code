@@ -26,11 +26,9 @@ class Prod10k(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         groupby = list(self.df.groupby(['image_name']))
-        self.images = [
-            image_name
-            for (image_name, _, _), group
-            in groupby
-        ]
+        self.images = image_name
+
+       
 
     
     def __len__(self):
