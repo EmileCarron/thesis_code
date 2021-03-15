@@ -14,6 +14,7 @@ from torchvision.transforms import RandomResizedCrop
 from torchvision.transforms import Scale
 import BBtransform
 from BBtransform import BBtrans
+import albumentations as A
 
 COLUMN_NAMES = ['image_name', 'x1', 'y1', 'x2', 'y2', 'class', 'image_width',
                 'image_height']
@@ -26,7 +27,12 @@ class Sku(Dataset):
     def __init__(self,csv_file, root_dir, transform=None):
         self.df = pd.read_csv(csv_file, names=COLUMN_NAMES)
         self.root_dir = root_dir
-        self.transform = transform
+        self.transform = A.Compose([
+                            A.RandomCrop(width=1333, height=800),
+                            A.HorizontalFlip(p=0.5),
+                            A.RandomBrightnessContrast(p=0.2),
+                            ], bbox_params=A.BboxParams(format='coco', label_fields=['class_labels']))
+                            
         groupby = list(self.df.groupby(['image_name',
                                    'image_width',
                                    'image_height']))
@@ -56,7 +62,9 @@ class Sku(Dataset):
         target = self.targets[idx]
         
         if(self.transform is not None):
-            image, target = self.transform(image, target)
+            print(type(image))
+            image, target = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
+            print("goede loop")
         else:
             image = ToTensor()(image)
             target = BBtrans()(target, 300, image)
