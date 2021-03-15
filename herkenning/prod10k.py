@@ -34,7 +34,7 @@ class Prod10k(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
             
-        img_name = os.path.join(self.root_dir, self.images[idx])
+        img_name = os.path.join(self.root_dir, self.df[idx])
         image = Image.open(img_name)
         target = self.targets[idx]
         
