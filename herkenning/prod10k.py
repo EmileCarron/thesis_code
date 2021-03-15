@@ -14,7 +14,7 @@ from torchvision.transforms import RandomResizedCrop
 from torchvision.transforms import Scale
 
 
-COLUMN_NAMES = ['image_name', 'class', 'group']
+COLUMN_NAMES = ['image_name', 'classe', 'group']
   
 class Prod10k(Dataset):
       
@@ -26,6 +26,12 @@ class Prod10k(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         groupby = list(self.df.groupby(['image_name']))
+        
+        self.targets = [
+            {
+            "classe": classe.values,
+            "group": group.values
+            }
     
     def __len__(self):
         return len(self.df)
@@ -36,6 +42,7 @@ class Prod10k(Dataset):
             
         img_name = os.path.join(self.root_dir, self.df[idx])
         image = Image.open(img_name)
+        target = self.targets[idx]
         
         if(self.transform is not None):
             image, target = self.transform(image, target)
