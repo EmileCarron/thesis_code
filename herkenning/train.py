@@ -9,7 +9,6 @@ from torch.utils.data import DataLoader
 from torch.optim import SGD
 import prod10k
 from prod10k import Prod10k
-from retinanet import RetinaNetLightning
 import sys
 
 def main(arguments):
