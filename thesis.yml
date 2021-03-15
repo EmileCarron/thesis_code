@@ -11,3 +11,5 @@ dependencies:
   - opencv
   - scikit-image
   - wandb
+  - imgaug
+  - albumentations
