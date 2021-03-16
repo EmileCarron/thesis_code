@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 from skimage import io
 import numpy as np
 from PIL import Image
+from PIL import ImageFile
 import cv2
 from torchvision.transforms import ToTensor
 from torchvision.transforms import Resize
