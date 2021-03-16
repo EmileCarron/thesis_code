@@ -20,6 +20,7 @@ def main(arguments):
     val_set = Sku(csv_file = '../../../dataset/SKU110K_fixed/annotations/annotations_val.csv',root_dir = '../../../dataset/SKU110K_fixed/images')
     test_set = Sku(csv_file = '../../../dataset/SKU110K_fixed/annotations/annotations_test.csv',root_dir = '../../../dataset/SKU110K_fixed/images')
     
+    print(len(train_set))
     print(len(test_set))
     train_set, train2 = torch.utils.data.random_split(train_set, [100, 8119])
     test_set, test2 = torch.utils.data.random_split(train_set, [100, 2836])
