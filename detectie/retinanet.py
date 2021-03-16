@@ -41,7 +41,7 @@ class RetinaNetLightning(pl.LightningModule):
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])
         ]
-        y_hat = self.layers(x)
+        y_hat = self.model(x)
         loss = self.ce(y_hat, y)
         y_hat = torch.argmax(y_hat, dim=1)
         accuracy = torch.sum(y == y_hat).item() / (len(y) * 1.0)
