@@ -27,7 +27,7 @@ def main(arguments):
     test = DataLoader(test_set, batch_size=1, num_workers=int(arguments[1]))
     
     wandb_logger = WandbLogger()
-    
+    wandb.init(project='thesis', entity='mille')
 
     
     model = RetinaNetLightning()

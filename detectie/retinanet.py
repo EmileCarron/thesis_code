@@ -14,7 +14,7 @@ class RetinaNetLightning(pl.LightningModule):
     def __init__(self):
         super().__init__()
         self.model = torchvision.models.detection.retinanet_resnet50_fpn(pretrained=True)
-        self.save_hyperparameters()
+        #self.save_hyperparameters()
         
     def training_step(self, batch, batch_idx):
         x, y = batch
