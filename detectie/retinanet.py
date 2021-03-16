@@ -23,9 +23,9 @@ class RetinaNetLightning(pl.LightningModule):
         ]
         losses = self.model(x,y)
         tot = losses['classification'] + losses['bbox_regression']
-        self.log("loss_epoch_class", losses['classification'], on_step=False, on_epoch=True)
-        self.log("loss_epoch_bb", losses['bbox_regression'], on_step=False, on_epoch=True)
-        self.log("loss_epoch", tot, on_step=False, on_epoch=True)
+        self.log("loss_epoch_class", losses['classification'], on_step=True, on_epoch=True)
+        self.log("loss_epoch_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
+        self.log("loss_epoch", tot, on_step=True, on_epoch=True)
         return losses['classification'] + losses['bbox_regression']
         
     def validation_step(self, batch, batch_idx):
@@ -34,22 +34,17 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
-        #self.log('valid_loss', losses)
+        self.log("valid_loss", losses, on_step=True, on_epoch=True)
+        return losses['classification'] + losses['bbox_regression']
         
     def test_step(self, batch, batch_idx):
         x, y = batch
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])
         ]
-        y_hat = self.model(x)
-        loss = self.ce(y_hat, y)
-        y_hat = torch.argmax(y_hat, dim=1)
-        accuracy = torch.sum(y == y_hat).item() / (len(y) * 1.0)
-        output = dict({
-            'test_loss': loss,
-            'test_acc': torch.tensor(accuracy),
-        })
-        return output
+        losses = self.model(x,y)
+        self.log("test_loss", losses, on_step=True, on_epoch=True)
+        return losses['classification'] + losses['bbox_regression']
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)

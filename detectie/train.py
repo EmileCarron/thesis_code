@@ -20,7 +20,7 @@ def main(arguments):
     val_set = Sku(csv_file = '../../../dataset/SKU110K_fixed/annotations/annotations_val.csv',root_dir = '../../../dataset/SKU110K_fixed/images')
     test_set = Sku(csv_file = '../../../dataset/SKU110K_fixed/annotations/annotations_test.csv',root_dir = '../../../dataset/SKU110K_fixed/images')
     
-    train_set, train2 = torch.utils.data.random_split(train_set, [500, 7719])
+    train_set, train2 = torch.utils.data.random_split(train_set, [100, 8119])
     
     train= DataLoader(train_set, batch_size=1, num_workers=int(arguments[1]))
     val = DataLoader(val_set, batch_size=1, num_workers=int(arguments[1]))
