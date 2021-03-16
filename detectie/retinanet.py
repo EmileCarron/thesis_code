@@ -30,6 +30,21 @@ class RetinaNetLightning(pl.LightningModule):
         ]
         losses = self.model(x,y)
         #self.log('valid_loss', losses)
+        
+    def test_step(self, batch, batch_idx):
+        x, y = batch
+        y = [{'boxes': b, 'labels': l}
+        for b, l in zip(y['boxes'],y['labels'])
+        ]
+        y_hat = self.layers(x)
+        loss = self.ce(y_hat, y)
+        y_hat = torch.argmax(y_hat, dim=1)
+        accuracy = torch.sum(y == y_hat).item() / (len(y) * 1.0)
+        output = dict({
+            'test_loss': loss,
+            'test_acc': torch.tensor(accuracy),
+        })
+        return output
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
