@@ -42,7 +42,11 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
-        #self.log("test_loss", losses, on_step=True, on_epoch=True)
+        output = dict({
+        'test_loss': losses,
+        'test_acc': torch.tensor(accuracy),
+        })
+        return output
        
 
     def configure_optimizers(self):
