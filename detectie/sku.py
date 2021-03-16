@@ -16,6 +16,7 @@ import BBtransform
 from BBtransform import BBtrans
 import albumentations as A
 
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 COLUMN_NAMES = ['image_name', 'x1', 'y1', 'x2', 'y2', 'class', 'image_width',
                 'image_height']
   
