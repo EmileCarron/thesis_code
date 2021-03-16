@@ -27,11 +27,12 @@ class Sku(Dataset):
     def __init__(self,csv_file, root_dir, transform=None):
         self.df = pd.read_csv(csv_file, names=COLUMN_NAMES)
         self.root_dir = root_dir
-        self.transform = A.Compose([
-                            A.RandomCrop(width=1333, height=800),
-                            A.HorizontalFlip(p=0.5),
-                            A.RandomBrightnessContrast(p=0.2),
-                            ], bbox_params=A.BboxParams(format='coco', label_fields=['class_labels']))
+        self.transform = transform
+        #self.transform = A.Compose([
+                            #A.RandomCrop(width=1333, height=800),
+                            #A.HorizontalFlip(p=0.5),
+                            #A.RandomBrightnessContrast(p=0.2),
+                            #], bbox_params=A.BboxParams(format='coco', label_fields=['class_labels']))
                             
         groupby = list(self.df.groupby(['image_name',
                                    'image_width',
