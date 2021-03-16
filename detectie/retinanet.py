@@ -22,6 +22,7 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
+        #print(losses)
         tot = losses['classification'] + losses['bbox_regression']
         self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
         self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
@@ -34,7 +35,8 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
-        loss = torch.argmax(losses, dim=1)
+        #print(losses[0]['scores'])
+        loss = torch.argmax(losses[0]['scores'], dim=1)
         self.log("valid_score", loss, on_step=True, on_epoch=True)
         
     def test_step(self, batch, batch_idx):
