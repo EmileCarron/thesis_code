@@ -11,6 +11,8 @@ import sku
 from sku import Sku
 from retinanet import RetinaNetLightning
 import sys
+import wandb
+from pytorch_lightning.logging import WandbLogger
 
 def main(arguments):
 
@@ -24,9 +26,14 @@ def main(arguments):
     val = DataLoader(val_set, batch_size=1, num_workers=int(arguments[1]))
     test = DataLoader(test_set, batch_size=1, num_workers=int(arguments[1]))
     
+    wandb_logger = WandbLogger()
+    wandb.init(project='thesis', entity='mille')
+
+    
     model = RetinaNetLightning()
     
-    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=int(arguments[2]))
+    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=int(arguments[2]),
+        logger=wandb_logger)
     trainer.fit(model, train, val)
     trainer.test(model, test)
     
