@@ -34,7 +34,7 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
-        self.log("valid_loss", losses, on_step=True, on_epoch=True)
+        #self.log("valid_loss", losses, on_step=True, on_epoch=True)
         
     def test_step(self, batch, batch_idx):
         x, y = batch
@@ -42,7 +42,7 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
-        self.log("test_loss", losses, on_step=True, on_epoch=True)
+        #self.log("test_loss", losses, on_step=True, on_epoch=True)
        
 
     def configure_optimizers(self):
