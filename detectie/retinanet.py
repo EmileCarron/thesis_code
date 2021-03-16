@@ -34,7 +34,7 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
-        self.log("valid_score", losses['classification'], on_step=True, on_epoch=True)
+        self.log("valid_score", losses['scores'], on_step=True, on_epoch=True)
         
     def test_step(self, batch, batch_idx):
         x, y = batch
