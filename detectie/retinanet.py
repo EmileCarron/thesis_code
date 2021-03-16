@@ -43,7 +43,7 @@ class RetinaNetLightning(pl.LightningModule):
         ]
         losses = self.model(x,y)
         self.log("test_loss", losses, on_step=True, on_epoch=True)
-        return losses['classification'] + losses['bbox_regression']
+       
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
