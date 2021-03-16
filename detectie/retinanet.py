@@ -34,7 +34,8 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
-        self.log("valid_score", losses['scores'], on_step=True, on_epoch=True)
+        loss = torch.argmax(losses, dim=1)
+        self.log("valid_score", loss, on_step=True, on_epoch=True)
         
     def test_step(self, batch, batch_idx):
         x, y = batch
