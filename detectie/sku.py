@@ -68,10 +68,10 @@ class Sku(Dataset):
             print("goede loop")
         else:
             image = ToTensor()(image)
-            target = BBtrans()(target, 300, image)
-            image = Resize(300,2)(image)
+            target = BBtrans()(target, 1080, image)
+            image = Resize(1080,2)(image)
             #target = Resize(300,2)(target)
-            image = RandomResizedCrop(300)(image)
+            image = RandomResizedCrop(1080)(image)
     
         return image, target
         
