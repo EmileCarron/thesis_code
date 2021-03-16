@@ -34,6 +34,7 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
+        print(losses)
         #self.log("valid_loss", losses, on_step=True, on_epoch=True)
         
     def test_step(self, batch, batch_idx):
@@ -42,9 +43,10 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         losses = self.model(x,y)
-        self.log("loss_test_class", losses['classification'], on_step=True, on_epoch=True)
-        self.log("loss_test_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
-        self.log("loss_test", tot, on_step=True, on_epoch=True)
+        print(losses)
+        #self.log("loss_test_class", losses['classification'], on_step=True, on_epoch=True)
+        #self.log("loss_test_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
+        #self.log("loss_test", tot, on_step=True, on_epoch=True)
         return losses
        
 
