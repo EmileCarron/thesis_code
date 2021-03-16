@@ -22,6 +22,7 @@ def main(arguments):
     
     print(len(test_set))
     train_set, train2 = torch.utils.data.random_split(train_set, [100, 8119])
+    test_set, test2 = torch.utils.data.random_split(train_set, [100, 2836])
     
     train= DataLoader(train_set, batch_size=1, num_workers=int(arguments[1]))
     val = DataLoader(val_set, batch_size=1, num_workers=int(arguments[1]))
