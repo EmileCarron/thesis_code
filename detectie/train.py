@@ -12,7 +12,7 @@ from sku import Sku
 from retinanet import RetinaNetLightning
 import sys
 import wandb
-from pytorch_lightning.logging import WandbLogger
+from pytorch_lightning.loggers import WandbLogger
 
 def main(arguments):
 
