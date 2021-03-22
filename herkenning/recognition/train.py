@@ -13,6 +13,12 @@ from retinanet import RetinaNetLightning
 import sys
 from argparse import ArgumentParser
 
+SAMPLE_DATA_URL = {
+    'data': BASE_URL + "AliProducts_train_sample.tar.gz",
+    'json': BASE_URL + "AliProducts_train_sample.json"
+}
+
+
 class Prod10kDataModule(pl.LightningDataModule):
     def __init__(self):
         super().__init__()
@@ -30,6 +36,31 @@ class Prod10kDataModule(pl.LightningDataModule):
         
     def val_dataloader(self):
         return DataLoader(self.val_set, batch_size = self.batch_size, num_workers = args.num_workers)
+        
+class AliproductsDataModule(pl.LightningDataModule):
+    def __init__(self):
+        super().__init__()
+        self.root = args.data_dir/Aliproducts
+        imgs_json = self.root / 'AliProducts_train_sample.json'
+        self.img_labels = [
+            (img['id'], img['category_id'])
+            for img in json.load(imgs_json.open())['images']
+        ]
+        self.img_dir = self.root / 'train'
+
+    def prepare_data(self):
+        download_and_extract_archive(SAMPLE_DATA_URL['data'], self.root)
+        download_url(SAMPLE_DATA_URL['json'], self.root)
+    
+    def setup(self, stage=None):
+        if stage == 'fit' or stage is None:
+    
+    def train_dataloader(self):
+        return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = args.num_workers)
+        
+    def val_dataloader(self):
+        return DataLoader(self.val_set, batch_size = self.batch_size, num_workers = args.num_workers)
+
 
 
 def main(arguments):
