@@ -1,0 +1,8 @@
+/__pycache__
+/detectie/__pycache__
+/detectie/lightning_logs
+debug.py
+.*
+/detectie/__pycache__/*
+.DS_Store
+/detectie
