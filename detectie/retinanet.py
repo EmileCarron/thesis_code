@@ -37,20 +37,7 @@ class RetinaNetLightning(pl.LightningModule):
         #print(losses[0]['scores'])
         loss = torch.argmax(losses[0]['scores'])
         self.log("valid_score", loss, on_step=True, on_epoch=True)
-        
-    def test_step(self, batch, batch_idx):
-        x, y = batch
-        y = [{'boxes': b, 'labels': l}
-        for b, l in zip(y['boxes'],y['labels'])
-        ]
-        losses = self.model(x,y)
-        #print(losses)
-        #self.log("loss_test_class", losses['classification'], on_step=True, on_epoch=True)
-        #self.log("loss_test_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
-        #self.log("loss_test", tot, on_step=True, on_epoch=True)
-        return losses
        
-
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
