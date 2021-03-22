@@ -15,35 +15,45 @@ import wandb
 from pytorch_lightning.loggers import WandbLogger
 from argparse import ArgumentParser
 
+
+class RetinaNetDataModule(pl.LightningDataModule):
+    
+    def __init__(self):
+        super().__init__()
+        self.data_dir = args.data_dir + '/SKU110K_fixed'
+        self.batch_size = args.batch_size
+        
+    def setup(self, stage=None):
+        print(self.data_dir)
+        if stage == 'fit' or stage is None:
+            self.train_set = Sku(csv_file = self.data_dir + '/annotations/annotations_train.csv', root_dir = self.data_dir +'/images')
+            self.val_set = Sku(csv_file = self.data_dir + '/annotations/annotations_val.csv', root_dir = self.data_dir + '/images')
+        
+    def train_dataloader(self):
+        return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = args.num_workers)
+        
+    def val_dataloader(self):
+        return DataLoader(self.val_set, batch_size = self.batch_size, num_workers = args.num_workers)
+
+
 def main(args):
 
-    train_set = Sku(csv_file = '../../../dataset/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '../../../dataset/SKU110K_fixed/images')
-    val_set = Sku(csv_file = '../../../dataset/SKU110K_fixed/annotations/annotations_val.csv',root_dir = '../../../dataset/SKU110K_fixed/images')
-    test_set = Sku(csv_file = '../../../dataset/SKU110K_fixed/annotations/annotations_test.csv',root_dir = '../../../dataset/SKU110K_fixed/images')
-    
-    print(len(train_set))
-    print(len(test_set))
-    train_set, train2 = torch.utils.data.random_split(train_set, [1000, 7219])
-    test_set, test2 = torch.utils.data.random_split(test_set, [1000, 1936])
-    
-    train= DataLoader(train_set, batch_size=1, num_workers=args.num_workers)
-    val = DataLoader(val_set, batch_size=1, num_workers=args.num_workers)
-    test = DataLoader(test_set, batch_size=1, num_workers=args.num_workers)
-    
     wandb_logger = WandbLogger()
     wandb.init(project='thesis', entity='mille')
 
     
     model = RetinaNetLightning()
+    dm = RetinaNetDataModule()
     
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=1, logger=wandb_logger)
-    trainer.fit(model, train, val)
-    trainer.test(model, test)
+    trainer.fit(model, dm)
     
 
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--num_workers', type=int, default=12)
+    parser.add_argument('--batch_size', type=int, default=1)
+    parser.add_argument('--data_dir', type=str, default='../../../dataset')
     args = parser.parse_args()
     print("Num_workers: " , args.num_workers)
     #print("Max_epochs: " + sys.argv[2])
