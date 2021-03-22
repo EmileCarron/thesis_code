@@ -13,8 +13,9 @@ from retinanet import RetinaNetLightning
 import sys
 import wandb
 from pytorch_lightning.loggers import WandbLogger
+from argparse import ArgumentParser
 
-def main(arguments):
+def main(args):
 
     train_set = Sku(csv_file = '../../../dataset/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '../../../dataset/SKU110K_fixed/images')
     val_set = Sku(csv_file = '../../../dataset/SKU110K_fixed/annotations/annotations_val.csv',root_dir = '../../../dataset/SKU110K_fixed/images')
@@ -25,9 +26,9 @@ def main(arguments):
     train_set, train2 = torch.utils.data.random_split(train_set, [1000, 7219])
     test_set, test2 = torch.utils.data.random_split(test_set, [1000, 1936])
     
-    train= DataLoader(train_set, batch_size=1, num_workers=int(arguments[1]))
-    val = DataLoader(val_set, batch_size=1, num_workers=int(arguments[1]))
-    test = DataLoader(test_set, batch_size=1, num_workers=int(arguments[1]))
+    train= DataLoader(train_set, batch_size=1, num_workers=args.num_workers)
+    val = DataLoader(val_set, batch_size=1, num_workers=args.num_workers)
+    test = DataLoader(test_set, batch_size=1, num_workers=args.num_workers)
     
     wandb_logger = WandbLogger()
     wandb.init(project='thesis', entity='mille')
@@ -35,13 +36,15 @@ def main(arguments):
     
     model = RetinaNetLightning()
     
-    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=int(arguments[2]),
-        logger=wandb_logger)
+    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=1, logger=wandb_logger)
     trainer.fit(model, train, val)
     trainer.test(model, test)
     
 
 if __name__ == '__main__':
-    print("Num_workers: " + sys.argv[1])
-    print("Max_epochs: " + sys.argv[2])
-    main(sys.argv)
+    parser = ArgumentParser()
+    parser.add_argument('--num_workers', type=int, default=12)
+    args = parser.parse_args()
+    print("Num_workers: " , args.num_workers)
+    #print("Max_epochs: " + sys.argv[2])
+    main(args)
