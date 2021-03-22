@@ -54,6 +54,7 @@ class AliproductsDataModule(pl.LightningDataModule):
     
     def setup(self, stage=None):
         if stage == 'fit' or stage is None:
+            self.train_set = Aliproducts(root = self.root)
     
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = args.num_workers)
@@ -66,7 +67,7 @@ class AliproductsDataModule(pl.LightningDataModule):
 def main(arguments):
     
     model = RecognitionModel()
-    dm = Prod10kDataModule()
+    dm = AliproductsDataModule()
     
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=int(arguments[2]))
     trainer.fit(model, dm)
