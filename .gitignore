@@ -5,3 +5,4 @@ debug.py
 /detectie/__pycache__/*
 /detectie/wandb
 */__pycache__/*
+*/.DS_Store
