@@ -46,7 +46,7 @@ PAL_IMGS_WITH_BYTE_TRANSPAR = [
 
 
 class AliProducts(Dataset):
-    def __init__(self, root, data_type='train', transform=None, sample=False,
+    def __init__(self, root, img_labels, data_type='train', transform=None, sample=False,
                  download=False):
         """
         Initialize the AliProducts dataset located at the given root directory.
@@ -63,30 +63,9 @@ class AliProducts(Dataset):
         self.root = Path(root)
         self.data_type = data_type
         self.transform = transform
-
-        if download:
-            self.download()
-
-        if self.data_type == 'sample':
-            imgs_json = self.root / 'AliProducts_train_sample.json'
-            self.img_labels = [
-                (img['id'], img['category_id'])
-                for img in json.load(imgs_json.open())['images']
-            ]
-            self.img_dir = self.root / 'train'
-        elif self.data_type in ['train', 'val']:
-            imgs_json = self.root / f'{self.data_type}.json'
-            self.img_labels = [
-                (img['image_id'], img['class_id'])
-                for img in json.load(imgs_json.open())['images']
-                if img['image_id'] not in PAL_IMGS_WITH_BYTE_TRANSPAR
-            ]
-            self.img_dir = self.root / self.data_type
-        elif self.data_type == 'test':
-            raise NotImplementedError('The AliProducts test set is not '
-                                      'available yet...')
-        else:
-            raise ValueError(f'Unkown data type {self.data_type}')
+        self.img_labels = img_labels
+        self.img_dir = self.root / 'train'
+        
 
     @property
     def img_labels(self):
@@ -119,23 +98,6 @@ class AliProducts(Dataset):
             raise NotImplementedError('The AliProducts test set is not '
                                       'available yet...')
 
-    def download(self):
-        if self._check_exists():
-            return
-
-        if self.data_type == 'sample':
-            download_and_extract_archive(SAMPLE_DATA_URL['data'], self.root)
-            download_url(SAMPLE_DATA_URL['json'], self.root)
-        elif self.data_type in ['train', 'val']:
-            for url in FULL_DATA_URLS['json']:
-                download_url(url, self.root)
-            for url in FULL_DATA_URLS['data']:
-                download_and_extract_archive(url, self.root)
-        elif self.data_type == 'test':
-            raise NotImplementedError('The AliProducts test set is not '
-                                      'available yet...')
-        else:
-            raise ValueError(f'Unkown data type {self.data_type}')
 
     def __getitem__(self, index):
         img, label = self.img_labels[index]
