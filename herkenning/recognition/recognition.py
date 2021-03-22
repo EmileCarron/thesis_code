@@ -14,13 +14,14 @@ class RecognitionModel(pl.LightningModule):
         super().__init__()
         self.model = torchvision.models.resnet18(pretrained=True)
 
-    def forward(self, x):
-        return self.model(x)
-        
-    def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
-        return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
+#    def forward(self, x):
+#        return self.model(x)
+#
+#    def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
+#        return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
 
     def training_step(self, batch, batch_nb):
+        print(batch)
         x, y = batch
         loss = F.cross_entropy(self(x), y)
         tensorboard_logs = {'train_loss': loss}
