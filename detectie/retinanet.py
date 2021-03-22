@@ -11,10 +11,11 @@ from sku import Sku
 
 
 class RetinaNetLightning(pl.LightningModule):
-    def __init__(self):
+    def __init__(self, args):
         super().__init__()
         self.model = torchvision.models.detection.retinanet_resnet50_fpn(pretrained=True)
-        #self.save_hyperparameters()
+        self.args = args
+        self.save_hyperparameters()
         
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -35,9 +36,10 @@ class RetinaNetLightning(pl.LightningModule):
         ]
         detections = self.model(x,y)
         #print(losses[0]['scores'])
-        loss = torch.argmax(losses[0]['scores'])
-        self.log("valid_score", loss, on_step=True, on_epoch=True)
+        #loss = torch.argmax(losses[0]['scores'])
+        #self.log("valid_score", loss, on_step=True, on_epoch=True)
        
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.Adam(self.parameters(), lr = self.args.lr,
+                                    weight_decay = self.args.weight_decay)
         return optimizer

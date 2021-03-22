@@ -24,7 +24,6 @@ class RetinaNetDataModule(pl.LightningDataModule):
         self.batch_size = args.batch_size
         
     def setup(self, stage=None):
-        print(self.data_dir)
         if stage == 'fit' or stage is None:
             self.train_set = Sku(csv_file = self.data_dir + '/annotations/annotations_train.csv', root_dir = self.data_dir +'/images')
             self.val_set = Sku(csv_file = self.data_dir + '/annotations/annotations_val.csv', root_dir = self.data_dir + '/images')
@@ -41,8 +40,7 @@ def main(args):
     wandb_logger = WandbLogger()
     wandb.init(project='thesis', entity='mille')
 
-    
-    model = RetinaNetLightning()
+    model = RetinaNetLightning(args)
     dm = RetinaNetDataModule()
     
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=1, logger=wandb_logger)
@@ -52,9 +50,10 @@ def main(args):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--num_workers', type=int, default=12)
+    parser.add_argument('--weight_decay', type=int, default=0)
+    parser.add_argument('--momentum', type=float, default=0.95)
+    parser.add_argument('--lr', type=int, default=1e-3)
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--data_dir', type=str, default='../../../dataset')
     args = parser.parse_args()
-    print("Num_workers: " , args.num_workers)
-    #print("Max_epochs: " + sys.argv[2])
     main(args)
