@@ -34,8 +34,8 @@ class Prod10kDataModule(pl.LightningDataModule):
 
 def main(arguments):
     
-    model = RetinaNetLightning()
-    dm = RetinaNetDataModule()
+    model = RecognitionModel()
+    dm = Prod10kDataModule()
     
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=int(arguments[2]))
     trainer.fit(model, dm)
