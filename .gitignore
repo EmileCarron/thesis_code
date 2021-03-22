@@ -6,3 +6,5 @@ debug.py
 /detectie/wandb
 /*/__pycache__/*
 */.DS_Store
+/herkenning/recognition/__pycache__/
+/herkenning/recognition/lightning_logs/
