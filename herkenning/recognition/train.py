@@ -51,7 +51,6 @@ class AliproductsDataModule(pl.LightningDataModule):
         super().__init__()
         self.root = args.data_dir + '/Aliproducts'
         imgs_json = self.root + '/AliProducts_train_sample.json'
-        print(imgs_json)
         fObj = open(imgs_json,)
         self.img_labels = [
             (img['id'], img['category_id'])

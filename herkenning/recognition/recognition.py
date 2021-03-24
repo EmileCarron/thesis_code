@@ -21,7 +21,8 @@ class RecognitionModel(pl.LightningModule):
 #        return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
 
     def training_step(self, batch, batch_nb):
-        print(batch)
+        print("batch")
+        
         x, y = batch
         loss = F.cross_entropy(self(x), y)
         tensorboard_logs = {'train_loss': loss}
