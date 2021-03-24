@@ -39,7 +39,7 @@ class RecognitionModel(pl.LightningModule):
         self.log("loss_training_class", loss, on_step=True, on_epoch=True)
         self.log("accuaracy_training_class", accuracy, on_step=True, on_epoch=True)
         
-        return 'loss': loss
+        return loss
           
         
 

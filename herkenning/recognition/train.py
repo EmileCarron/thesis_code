@@ -16,6 +16,7 @@ from aliproducts import AliProducts
 from PIL import Image
 from copy import deepcopy
 import wandb
+from pytorch_lightning.loggers import WandbLogger
 
 
 
