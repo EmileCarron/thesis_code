@@ -11,11 +11,11 @@ import sys
 from argparse import ArgumentParser
 from recognition import RecognitionModel
 import json
-from torchvision.datasets.utils import (download_and_extract_archive,
-                                        download_url)
+from torchvision.datasets.utils import (download_and_extract_archive, download_url)
 from aliproducts import AliProducts
 from PIL import Image
 from copy import deepcopy
+import wandb
 
 
 
@@ -71,6 +71,9 @@ class AliproductsDataModule(pl.LightningDataModule):
         return DataLoader(self.train_set, batch_size = args.batch_size, num_workers = args.num_workers)
 
 def main(arg):
+
+    wandb_logger = WandbLogger()
+    wandb.init(project='thesis', entity='mille')
     
     model = RecognitionModel()
     dm = AliproductsDataModule()
