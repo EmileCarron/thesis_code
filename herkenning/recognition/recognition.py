@@ -23,11 +23,11 @@ class RecognitionModel(pl.LightningModule):
 #    def resnet18(pretrained: bool = False, progress: bool = True, **kwargs):
 #        return _resnet('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs)
 
-    def accuracy(self, logits, labels):
-        _, predicted = torch.max(logits.data, 1)
-        correct = (predicted == labels).sum().item()
-        accuracy = correct / len(labels)
-        return torch.tensor(accuracy)
+#    def accuracy(self, logits, labels):
+#        _, predicted = torch.max(logits.data, 1)
+#        correct = (predicted == labels).sum().item()
+#        accuracy = correct / len(labels)
+#        return torch.tensor(accuracy)
 
 
     def training_step(self, batch, batch_idx):
@@ -35,9 +35,9 @@ class RecognitionModel(pl.LightningModule):
         out = self.model(x)
         
         loss = torch.nn.CrossEntropyLoss()(out, labels)
-        accuracy = self.accuracy(out, labels)
+        #accuracy = self.accuracy(out, labels)
         self.log("loss_training_class", loss, on_step=True, on_epoch=True)
-        self.log("accuaracy_training_class", accuracy, on_step=True, on_epoch=True)
+        #self.log("accuaracy_training_class", accuracy, on_step=True, on_epoch=True)
         
         return loss
           
