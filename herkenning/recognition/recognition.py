@@ -61,7 +61,7 @@ class RecognitionModel(pl.LightningModule):
 
 
     def configure_optimizers(self):
-                                    
+        print(self.args.lr,self.args.weight_decay,self.args.momentum)
         if self.args.optim == 'Adam':
             optimizer = Adam(self.parameters(), lr=self.args.lr,
                              weight_decay=self.args.weight_decay)
