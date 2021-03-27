@@ -61,6 +61,13 @@ class RecognitionModel(pl.LightningModule):
 
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr = self.args.lr,
-                                    weight_decay = self.args.weight_decay)
+                                    
+        if self.args.optim == 'Adam':
+            optimizer = Adam(self.parameters(), lr=self.hparams.lr,
+                             weight_decay=self.hparams.weight_decay)
+        elif self.args.optim == 'SGD':
+            optimizer = SGD(self.parameters(), lr=self.hparams.lr,
+                            weight_decay=self.hparams.weight_decay,
+                            momentum=self.hparams.momentum)
+
         return optimizer

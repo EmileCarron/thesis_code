@@ -93,5 +93,6 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=1e-3)
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--data_dir', type=str, default='../../../dataset')
+    parser.add_argument('--optim', type=str, default='SGD')
     args = parser.parse_args()
     main(args)
