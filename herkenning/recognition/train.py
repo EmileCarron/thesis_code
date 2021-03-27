@@ -66,10 +66,13 @@ class AliproductsDataModule(pl.LightningDataModule):
     def setup(self, stage=None):
         if stage == 'fit' or stage is None:
             self.train_set = AliProducts(root = self.root, img_labels = self.img_labels)
-
+            self.train_set, self.val_set = torch.utils.data.random_split(self.train_set, [4000,937])
             
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size = args.batch_size, num_workers = args.num_workers)
+        
+    def val_dataloader(self):
+        return DataLoader(self.val_set, batch_size = args.batch_size, num_workers = args.num_workers)
 
 def main(arg):
 
