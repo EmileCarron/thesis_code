@@ -4,6 +4,7 @@ channels:
   - anaconda
   - conda-forge
   - defaults
+  - metric-learning
 dependencies:
   - pytorch-lightning
   - torchvision
@@ -11,3 +12,4 @@ dependencies:
   - opencv
   - scikit-image
   - wandb
+  - pytorch-metric-learning 
