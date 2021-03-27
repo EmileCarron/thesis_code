@@ -35,7 +35,6 @@ class RecognitionModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, labels = batch
         out = self.model(x)
-        print(self.args.lr,self.args.weight_decay,self.args.momentum)
         loss = torch.nn.CrossEntropyLoss()(out, labels)
         accuracy = self.accuracy(out, labels)
         self.log("loss_training_class", loss, on_step=True, on_epoch=True)
