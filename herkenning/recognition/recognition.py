@@ -44,40 +44,17 @@ class RecognitionModel(pl.LightningModule):
           
     def validation_step(self, batch, batch_idx):
         x, labels = batch
-        embeddings = torch.squeeze(self(x))
+        embeddings = self.model(x)
 
-        if self.loss_requires_classifier:
-            out = self.classifier(embeddings)
-        else:
-            out = embeddings
 
-        loss = self.loss_fn(out, labels)
+        out = embeddings
+
+        loss = torch.nn.CrossEntropyLoss()(out, labels)
 
         labels = labels.cpu().numpy()
         embeddings = embeddings.cpu().numpy()
 
-        accs = (AccuracyCalculator(include=['precision_at_1',
-                                            'mean_average_precision_at_r',
-                                            'r_precision'],
-                                   average_per_class=True)
-                .get_accuracy(
-                    query=embeddings,
-                    reference=embeddings,
-                    query_labels=labels,
-                    reference_labels=labels,
-                    embeddings_come_from_same_source=True
-                ))
-
-        # Values must be Tensors
-        accs = {k: torch.tensor(v).type_as(loss)
-                for k, v in accs.items()}
-
-        return {
-            'val_loss': loss,
-            'precision_at_1': accs['precision_at_1'],
-            'mean_average_precision_at_r': accs['mean_average_precision_at_r'],
-            'r_precision': accs['r_precision']
-        }
+        return loss
 
         
 
