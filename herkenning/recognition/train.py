@@ -81,7 +81,7 @@ def main(arg):
     
     model = RecognitionModel()
     dm = AliproductsDataModule()
-    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, wandb_logger)
+    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
     trainer.fit(model, dm)
 
 if __name__ == '__main__':
