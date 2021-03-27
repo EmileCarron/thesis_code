@@ -79,7 +79,7 @@ def main(arg):
     wandb_logger = WandbLogger()
     wandb.init(project='thesis', entity='mille')
     
-    model = RecognitionModel()
+    model = RecognitionModel(args)
     dm = AliproductsDataModule()
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
     trainer.fit(model, dm)
