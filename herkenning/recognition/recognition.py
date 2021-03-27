@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from torch.optim import SGD
 from collections import OrderedDict
 from torchvision.models import resnet18
+from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
 
 class RecognitionModel(pl.LightningModule):
 
@@ -41,6 +42,43 @@ class RecognitionModel(pl.LightningModule):
         
         return loss
           
+    def validation_step(self, batch, batch_idx):
+        x, labels = batch
+        embeddings = torch.squeeze(self(x))
+
+        if self.loss_requires_classifier:
+            out = self.classifier(embeddings)
+        else:
+            out = embeddings
+
+        loss = self.loss_fn(out, labels)
+
+        labels = labels.cpu().numpy()
+        embeddings = embeddings.cpu().numpy()
+
+        accs = (AccuracyCalculator(include=['precision_at_1',
+                                            'mean_average_precision_at_r',
+                                            'r_precision'],
+                                   average_per_class=True)
+                .get_accuracy(
+                    query=embeddings,
+                    reference=embeddings,
+                    query_labels=labels,
+                    reference_labels=labels,
+                    embeddings_come_from_same_source=True
+                ))
+
+        # Values must be Tensors
+        accs = {k: torch.tensor(v).type_as(loss)
+                for k, v in accs.items()}
+
+        return {
+            'val_loss': loss,
+            'precision_at_1': accs['precision_at_1'],
+            'mean_average_precision_at_r': accs['mean_average_precision_at_r'],
+            'r_precision': accs['r_precision']
+        }
+
         
 
 
