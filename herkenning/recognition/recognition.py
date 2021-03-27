@@ -53,7 +53,7 @@ class RecognitionModel(pl.LightningModule):
 
         labels = labels.cpu().numpy()
         embeddings = embeddings.cpu().numpy()
-
+        self.log("loss_validation_class", loss, on_step=True, on_epoch=True)
         return loss
 
         
