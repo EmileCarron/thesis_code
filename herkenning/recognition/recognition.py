@@ -13,9 +13,10 @@ from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
 
 class RecognitionModel(pl.LightningModule):
 
-    def __init__(self):
+    def __init__(self,args):
         super().__init__()
         self.model = torchvision.models.resnet18(pretrained=True)
+        self.args = args
         
 
 #    def forward(self, x):
@@ -60,4 +61,6 @@ class RecognitionModel(pl.LightningModule):
 
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=0.02)
+        optimizer = torch.optim.Adam(self.parameters(), lr = self.args.lr,
+                                    weight_decay = self.args.weight_decay)
+        return optimizer
