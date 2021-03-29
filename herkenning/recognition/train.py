@@ -58,7 +58,7 @@ class AliproductsDataModule(pl.LightningDataModule):
             for img in json.load(fObj)['images']
         ]
         self.img_dir = self.root + '/train'
-
+        args.num_classes = 195
     def prepare_data(self):
         download_and_extract_archive(SAMPLE_DATA_URL['data'], self.root)
         download_url(SAMPLE_DATA_URL['json'], self.root)
@@ -78,9 +78,9 @@ def main(arg):
 
     wandb_logger = WandbLogger()
     wandb.init(project='thesis', entity='mille')
-    
-    model = RecognitionModel(args)
     dm = AliproductsDataModule()
+    model = RecognitionModel(args)
+   
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
     trainer.fit(model, dm)
 
@@ -94,5 +94,11 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--data_dir', type=str, default='../../../dataset')
     parser.add_argument('--optim', type=str, default='SGD')
+    parser.add_argument('--loss', type=str, default= 'CrossEntropy',
+                            help='The name of the loss function to use.',
+                            choices=['CrossEntropy', 'ArcFace',
+                                     'TripletMargin', 'CosFace', 'CircleLoss'])
+    parser.add_argument('--num_classes', type=int)
+
     args = parser.parse_args()
     main(args)
