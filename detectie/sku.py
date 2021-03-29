@@ -14,6 +14,8 @@ from torchvision.transforms import Resize
 from torchvision.transforms import RandomResizedCrop
 from torchvision.transforms import Scale
 import albumentations as A
+import BBtransform
+from BBtransform import BBtrans
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 COLUMN_NAMES = ['image_name', 'x1', 'y1', 'x2', 'y2', 'class', 'image_width',
@@ -64,18 +66,21 @@ class Sku(Dataset):
         
         if(self.transform is not None):
             print(target['boxes'])
-            print(image.shape[:2])
+            targettrans = target
             transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
             image = transformed['image']
-            target['boxes'] = transformed['bboxes']
-            target['labels'] = transformed['class_labels']
+            targettrans['boxes'] = transformed['bboxes']
+            targettrans['labels'] = transformed['class_labels']
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
-            target = ToTensor()(target)
-            print(len(target['labels']))
-            print(len(target['boxes']))
-            print(target['labels'])
-            print(target['boxes'])
+            print(type(target))
+            print(targettrans)
+            #target = BBtrans()(target, targettrans)
+            
+            #print(target['boxes'][0])
+            #print(target['boxes'][0][0])
+            #print(target['labels'])
+            #print(target['boxes'])
             
             print("goede loop")
      
