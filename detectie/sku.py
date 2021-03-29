@@ -13,8 +13,6 @@ from torchvision.transforms import ToTensor
 from torchvision.transforms import Resize
 from torchvision.transforms import RandomResizedCrop
 from torchvision.transforms import Scale
-import BBtransform
-from BBtransform import BBtrans
 import albumentations as A
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -26,15 +24,15 @@ class Sku(Dataset):
     # This function prints the type
     # of the object passed as well
     # as the object item
-    def __init__(self,csv_file, root_dir, transform=None):
+    def __init__(self,csv_file, root_dir, transform):
         self.df = pd.read_csv(csv_file, names=COLUMN_NAMES)
         self.root_dir = root_dir
         self.transform = transform
-        #self.transform = A.Compose([
-                            #A.RandomCrop(width=1333, height=800),
-                            #A.HorizontalFlip(p=0.5),
-                            #A.RandomBrightnessContrast(p=0.2),
-                            #], bbox_params=A.BboxParams(format='coco', label_fields=['class_labels']))
+#        self.transform = A.Compose([
+#                            A.RandomCrop(width=1333, height=800),
+#                            A.HorizontalFlip(p=0.5),
+#                            A.RandomBrightnessContrast(p=0.2),
+#                            ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
                             
         groupby = list(self.df.groupby(['image_name',
                                    'image_width',
@@ -61,19 +59,26 @@ class Sku(Dataset):
             idx = idx.tolist()
             
         img_name = os.path.join(self.root_dir, self.images[idx])
-        image = Image.open(img_name)
+        image = cv2.imread(img_name)
         target = self.targets[idx]
         
         if(self.transform is not None):
-            print(type(image))
-            image, target = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
+            print(target['boxes'])
+            print(image.shape[:2])
+            transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
+            image = transformed['image']
+            target['boxes'] = transformed['bboxes']
+            target['labels'] = transformed['class_labels']
+            pil_image=Image.fromarray(image)
+            image = ToTensor()(pil_image)
+            target = ToTensor()(target)
+            print(len(target['labels']))
+            print(len(target['boxes']))
+            print(target['labels'])
+            print(target['boxes'])
+            
             print("goede loop")
-        else:
-            image = ToTensor()(image)
-            target = BBtrans()(target, 1080, image)
-            image = Resize(1080,2)(image)
-            #target = Resize(300,2)(target)
-            image = RandomResizedCrop(1080)(image)
+     
     
         return image, target
         
