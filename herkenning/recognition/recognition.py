@@ -19,37 +19,56 @@ from pytorch_metric_learning import losses
 class RecognitionModel(pl.LightningModule):
 
     def __init__(self,args):
+    
         super().__init__()
         self.model = torchvision.models.resnet18(pretrained=True)
         self.args = args
-        self.num_classes = self.args.num_classes
+
+        self.extractor = torch.nn.Sequential(
+            OrderedDict(
+                list(self.model.named_children())[:-1]
+            )
+        )
+        
+        self.classifier = torch.nn.Sequential(
+            OrderedDict(
+                list(self.model.named_children())[-1:]
+            )
+        )
+
 
         if self.args.loss == 'CrossEntropy':
-            self.loss = torch.nn.CrossEntropyLoss()
+                self.loss = torch.nn.CrossEntropyLoss()
+                self.loss_requires_classifier = True
             
         elif self.args.loss == 'ArcFace':
-            self.loss = losses.ArcFaceLoss(
+                self.loss = losses.ArcFaceLoss(
                 margin=0.5,
-                num_classes=self.num_classes,
-                embedding_size = 256
-            )
+                embedding_size=self.classifier.fc.in_features,
+                num_classes=self.classifier.fc.out_features
+                )
+                self.loss_requires_classifier = False
             
-        elif self.args.loss == 'CosFace':
-            self.loss = losses.CosFaceLoss(
-                num_classes = self.num_classes,
-                embedding_size = 512,
-                margin=0.35,
-                scale=64
-            )
- 
+        elif self.args.loss == 'ContrastiveLoss':
+                self.loss = losses.ContrastiveLoss(
+                pos_margin=0,
+                neg_margin=1
+                )
+                self.loss_requires_classifier = False            
+            
+
         elif self.args.loss == 'TripletMargin':
-            self.loss = losses.TripletMarginLoss(
+                self.loss = losses.TripletMarginLoss(
                 margin=0.5
                 )
-            
+                self.loss_requires_classifier = False
+ 
         elif self.args.loss == 'CircleLoss':
-            self.loss = losses.CircleLoss(m=0.4, gamma=80)
-
+                self.loss = losses.CircleLoss(m=0.4,
+                gamma=80
+                )
+                self.loss_requires_classifier = False
+            
         else:
             raise ValueError(f'Unsupported loss: {self.args.loss}')
 
@@ -65,25 +84,36 @@ class RecognitionModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, labels = batch
         out = self.model(x)
-        loss = torch.nn.CrossEntropyLoss()(out, labels)
+        #import pdb; pdb.set_trace()
+        if self.loss_requires_classifier:
+            out = self.classifier(out)
+
+        loss = self.loss(out, labels)
         accuracy = self.accuracy(out, labels)
+
         self.log("loss_training_class", loss, on_step=True, on_epoch=True)
         self.log("accuaracy_training_class", accuracy, on_step=True, on_epoch=True)
-        
+ 
         return loss
           
     def validation_step(self, batch, batch_idx):
         x, labels = batch
         embeddings = self.model(x)
 
+        if self.loss_requires_classifier:
+            out = self.classifier(embeddings)
+        else:
+            out = embeddings
 
-        out = embeddings
 
-        loss = torch.nn.CrossEntropyLoss()(out, labels)
+
+        loss = self.loss(out, labels)
 
         labels = labels.cpu().numpy()
         embeddings = embeddings.cpu().numpy()
+        
         self.log("loss_validation_class", loss, on_step=True, on_epoch=True)
+        
         return loss
 
 
@@ -91,9 +121,12 @@ class RecognitionModel(pl.LightningModule):
         if self.args.optim == 'Adam':
             optimizer = Adam(self.parameters(), lr=self.args.lr,
                              weight_decay=self.args.weight_decay)
+                             
+        #Stochastic Gradient Descent is usefull when you have a lot of redundancy in your data
         elif self.args.optim == 'SGD':
-            optimizer = SGD(self.parameters(), lr=self.args.lr,
+            optimizer = SGD(self.parameters(), 
+                            lr=self.args.lr,
                             weight_decay=self.args.weight_decay,
                             momentum=self.args.momentum)
-
+                            
         return optimizer

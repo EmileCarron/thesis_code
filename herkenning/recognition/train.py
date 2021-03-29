@@ -48,9 +48,11 @@ class Prod10kDataModule(pl.LightningDataModule):
         return DataLoader(self.val_set, batch_size = self.batch_size, num_workers = args.num_workers)
         
 class AliproductsDataModule(pl.LightningDataModule):
-    def __init__(self):
+    def __init__(self, data_dir, batch_size, num_workers):
         super().__init__()
-        self.root = args.data_dir + '/Aliproducts'
+        self.num_workers = num_workers
+        self.batch_size = batch_size
+        self.root = data_dir + '/Aliproducts'
         imgs_json = self.root + '/AliProducts_train_sample.json'
         fObj = open(imgs_json,)
         self.img_labels = [
@@ -58,7 +60,7 @@ class AliproductsDataModule(pl.LightningDataModule):
             for img in json.load(fObj)['images']
         ]
         self.img_dir = self.root + '/train'
-        args.num_classes = 195
+        self.num_classes = 195
     def prepare_data(self):
         download_and_extract_archive(SAMPLE_DATA_URL['data'], self.root)
         download_url(SAMPLE_DATA_URL['json'], self.root)
@@ -69,16 +71,16 @@ class AliproductsDataModule(pl.LightningDataModule):
             self.train_set, self.val_set = torch.utils.data.random_split(self.train_set, [4000,937])
             
     def train_dataloader(self):
-        return DataLoader(self.train_set, batch_size = args.batch_size, num_workers = args.num_workers)
+        return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = self.num_workers)
         
     def val_dataloader(self):
-        return DataLoader(self.val_set, batch_size = args.batch_size, num_workers = args.num_workers)
+        return DataLoader(self.val_set, batch_size = self.batch_size, num_workers = self.num_workers)
 
-def main(arg):
+def main(args):
 
     wandb_logger = WandbLogger()
     wandb.init(project='thesis', entity='mille')
-    dm = AliproductsDataModule()
+    dm = AliproductsDataModule(data_dir = args.data_dir ,batch_size = args.batch_size, num_workers = args.num_workers)
     model = RecognitionModel(args)
    
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
@@ -97,8 +99,9 @@ if __name__ == '__main__':
     parser.add_argument('--loss', type=str, default= 'CrossEntropy',
                             help='The name of the loss function to use.',
                             choices=['CrossEntropy', 'ArcFace',
-                                     'TripletMargin', 'CosFace', 'CircleLoss'])
-    parser.add_argument('--num_classes', type=int)
+                                     'TripletMargin', 'ContrastiveLoss',
+                                     'CircleLoss', 'LargeMarginSoftmaxLoss'])
+    parser.add_argument('--embedding_size', type=int, default=512)
 
     args = parser.parse_args()
     main(args)
