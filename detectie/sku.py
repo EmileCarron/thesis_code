@@ -69,12 +69,12 @@ class Sku(Dataset):
             targettrans = target
             transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
             image = transformed['image']
-            targettrans['boxes'] = transformed['bboxes']
-            targettrans['labels'] = transformed['class_labels']
+            target['boxes'] = torch.tensor(transformed['bboxes'])
+            target['labels'] = torch.tensor(transformed['class_labels'])
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
             print(type(target))
-            print(targettrans)
+            print(target)
             #target = BBtrans()(target, targettrans)
             
             #print(target['boxes'][0])
