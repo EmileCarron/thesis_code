@@ -22,14 +22,26 @@ class RecognitionModel(pl.LightningModule):
     
         super().__init__()
         self.model = torchvision.models.resnet18(pretrained=True)
+        self.model.fc = nn.Linear(512, 195, True)
         self.args = args
-
+        print(self.model)
         self.extractor = torch.nn.Sequential(
             OrderedDict(
                 list(self.model.named_children())[:-1]
-            )
+            ),
+         
         )
         
+        
+        #ex = nn.Sequential(
+         #   self.extractor,
+         #   nn.Linear(512, 195, True)
+         #   )
+       
+        #self.extractor = ex
+            
+        #self.extractor.append(torch.nn.Linear(512, 195, True))
+        #print(self.extractor)
         self.classifier = torch.nn.Sequential(
             OrderedDict(
                 list(self.model.named_children())[-1:]
@@ -83,10 +95,12 @@ class RecognitionModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, labels = batch
-        out = self.model(x)
         #import pdb; pdb.set_trace()
         if self.loss_requires_classifier:
-            out = self.classifier(out)
+            out = self.model(x)
+        else:
+            out = self.extractor(x)
+            
 
         loss = self.loss(out, labels)
         accuracy = self.accuracy(out, labels)
@@ -98,19 +112,15 @@ class RecognitionModel(pl.LightningModule):
           
     def validation_step(self, batch, batch_idx):
         x, labels = batch
-        embeddings = self.model(x)
-
+        
         if self.loss_requires_classifier:
-            out = self.classifier(embeddings)
+            out = self.model(x)
         else:
-            out = embeddings
-
-
-
+            out = self.extractor(x)
         loss = self.loss(out, labels)
 
         labels = labels.cpu().numpy()
-        embeddings = embeddings.cpu().numpy()
+
         
         self.log("loss_validation_class", loss, on_step=True, on_epoch=True)
         
