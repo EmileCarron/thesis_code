@@ -24,23 +24,15 @@ class RecognitionModel(pl.LightningModule):
         self.model = torchvision.models.resnet18(pretrained=True)
         self.model.fc = nn.Linear(512, 195, True)
         self.args = args
-        print(self.model)
+        #print(self.model)
+        
         self.extractor = torch.nn.Sequential(
             OrderedDict(
                 list(self.model.named_children())[:-1]
             ),
          
         )
-        
-        
-        #ex = nn.Sequential(
-         #   self.extractor,
-         #   nn.Linear(512, 195, True)
-         #   )
-       
-        #self.extractor = ex
-            
-        #self.extractor.append(torch.nn.Linear(512, 195, True))
+
         #print(self.extractor)
         self.classifier = torch.nn.Sequential(
             OrderedDict(
