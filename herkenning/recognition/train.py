@@ -17,6 +17,7 @@ from PIL import Image
 from copy import deepcopy
 import wandb
 from pytorch_lightning.loggers import WandbLogger
+import albumentations as A
 
 
 
@@ -67,7 +68,11 @@ class AliproductsDataModule(pl.LightningDataModule):
     
     def setup(self, stage=None):
         if stage == 'fit' or stage is None:
-            self.train_set = AliProducts(root = self.root, img_labels = self.img_labels)
+            self.train_set = AliProducts(root = self.root, img_labels = self.img_labels, transform = torch.nn.Sequential(
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(degrees = 90),
+        torchvision.transforms.ColorJitter()
+        ))
             self.train_set, self.val_set = torch.utils.data.random_split(self.train_set, [4000,937])
             
     def train_dataloader(self):

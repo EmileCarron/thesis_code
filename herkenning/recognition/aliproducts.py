@@ -7,6 +7,8 @@ from PIL import Image
 from copy import deepcopy
 import random
 from torchvision.transforms import ToTensor
+import cv2
+import numpy as np
 
 BASE_URL = ("https://tianchi-public-us-east-download.oss-us-east-1."
             "aliyuncs.com/231780/")
@@ -47,7 +49,7 @@ PAL_IMGS_WITH_BYTE_TRANSPAR = [
 
 
 class AliProducts(Dataset):
-    def __init__(self, root, img_labels, data_type='train', transform=ToTensor(), sample=False,
+    def __init__(self, root, img_labels, data_type='train', transform=None, sample=False,
                  download=False):
         """
         Initialize the AliProducts dataset located at the given root directory.
@@ -103,9 +105,11 @@ class AliProducts(Dataset):
     def __getitem__(self, index):
         img, label = self.img_labels[index]
         im = Image.open(self.img_dir / label / img).convert('RGB')
+        
 
-        #if self.transform is not None:
-        im = self.transform(im)
+        if self.transform is not None:
+            im = self.transform(im)
+            im = ToTensor()(im)
 
         return (im, self.label_idxs[label])
 
