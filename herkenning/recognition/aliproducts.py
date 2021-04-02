@@ -6,8 +6,7 @@ import json
 from PIL import Image
 from copy import deepcopy
 import random
-from torchvision.transforms import ToTensor
-
+from torchvision import transforms
 import numpy as np
 
 BASE_URL = ("https://tianchi-public-us-east-download.oss-us-east-1."
@@ -108,8 +107,8 @@ class AliProducts(Dataset):
         im = Image.open(self.img_dir / label / img).convert('RGB')
     
         if self.transform is not None:
-            #im = self.transform(im)
-            im = ToTensor()(im)
+            im = self.transform(im)
+            #im = ToTensor()(im)
             #print(im)
         return (im, self.label_idxs[label])
 

@@ -62,17 +62,35 @@ class AliproductsDataModule(pl.LightningDataModule):
         ]
         self.img_dir = self.root + '/train'
         self.num_classes = 195
+    
+    def get_transform(self, normalize=True, to_tensor=True):
+        """Return the image transformation for the given dataset type.
+
+        Args:
+            data_type (str): The type of dataset. Should be one of 'train',
+            'val' or 'test'.
+            normalize (bool): If True, include ImageNet-style normalization.
+            to_tensor (bool): If True, transform the PIL Image to a tensor.
+        """
+       
+        tfms = [transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip()]
+        
+        tfms.append(transforms.ToTensor())
+        tfms.append(transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                             std=[0.229, 0.224, 0.225]))
+
+        return transforms.Compose(tfms)
+
+    
     def prepare_data(self):
         download_and_extract_archive(SAMPLE_DATA_URL['data'], self.root)
         download_url(SAMPLE_DATA_URL['json'], self.root)
     
     def setup(self, stage=None):
+        train_tfm = self.get_transform()
         if stage == 'fit' or stage is None:
-            self.train_set = AliProducts(root = self.root, img_labels = self.img_labels, transform = torch.nn.Sequential(
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(degrees = 90),
-        torchvision.transforms.ColorJitter()
-        ))
+            self.train_set = AliProducts(root = self.root, img_labels = self.img_labels, transform = train_tfm)
             self.train_set, self.val_set = torch.utils.data.random_split(self.train_set, [4000,937])
             
     def train_dataloader(self):
