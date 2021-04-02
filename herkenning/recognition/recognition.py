@@ -90,9 +90,9 @@ class RecognitionModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, labels = batch
         
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         out = torch.squeeze(self(x))
-        labels = torch.squeeze(labels)
+        #labels = torch.squeeze(labels)
         
         if self.loss_requires_classifier:
             out = self.model(x)
