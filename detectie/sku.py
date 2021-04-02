@@ -65,7 +65,7 @@ class Sku(Dataset):
         target = self.targets[idx]
         
         if(self.transform is not None):
-            print(target['boxes'])
+            #print(target['boxes'])
             targettrans = target
             transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
             image = transformed['image']
@@ -73,8 +73,8 @@ class Sku(Dataset):
             target['labels'] = torch.tensor(transformed['class_labels'])
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
-            print(type(target))
-            print(target)
+            #print(type(target))
+            #print(target)
             #target = BBtrans()(target, targettrans)
             
             #print(target['boxes'][0])
@@ -82,7 +82,7 @@ class Sku(Dataset):
             #print(target['labels'])
             #print(target['boxes'])
             
-            print("goede loop")
+            #print("goede loop")
      
     
         return image, target
