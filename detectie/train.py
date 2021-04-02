@@ -26,7 +26,7 @@ class RetinaNetDataModule(pl.LightningDataModule):
         
     def setup(self, stage=None):
         if stage == 'fit' or stage is None:
-            self.train_set = Sku(csv_file = self.data_dir + '/annotations/annotations_train_mod.csv', root_dir = self.data_dir +'/images', transform = A.Compose([
+            self.train_set = Sku(csv_file = self.data_dir + '/annotations/annotations_train.csv', root_dir = self.data_dir +'/images', transform = A.Compose([
                             A.RandomCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
             self.val_set = Sku(csv_file = self.data_dir + '/annotations/annotations_val.csv', root_dir = self.data_dir + '/images', transform = A.Compose([
