@@ -57,7 +57,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_workers', type=int, default=12)
     parser.add_argument('--weight_decay', type=int, default=0)
     parser.add_argument('--momentum', type=float, default=0.95)
-    parser.add_argument('--lr', type=int, default=1e-3)
+    parser.add_argument('--lr', type=float, default=1e-3)
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--data_dir', type=str, default='../../../dataset')
     args = parser.parse_args()
