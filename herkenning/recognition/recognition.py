@@ -63,7 +63,7 @@ class RecognitionModel(pl.LightningModule):
 
         elif self.args.loss == 'TripletMargin':
                 self.loss = losses.TripletMarginLoss(
-                margin=0.5
+                margin=0.1
                 )
                 self.loss_requires_classifier = False
  
@@ -76,6 +76,8 @@ class RecognitionModel(pl.LightningModule):
         else:
             raise ValueError(f'Unsupported loss: {self.args.loss}')
 
+    def forward(self, x):
+        return self.extractor.forward(x)
 
 
     def accuracy(self, logits, labels):
@@ -87,12 +89,13 @@ class RecognitionModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, labels = batch
-        #import pdb; pdb.set_trace()
+        
+        import pdb; pdb.set_trace()
+        out = torch.squeeze(self(x))
+        labels = torch.squeeze(labels)
+        
         if self.loss_requires_classifier:
             out = self.model(x)
-        else:
-            out = self.extractor(x)
-            
 
         loss = self.loss(out, labels)
         accuracy = self.accuracy(out, labels)
