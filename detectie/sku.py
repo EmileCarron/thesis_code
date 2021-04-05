@@ -73,7 +73,7 @@ class Sku(Dataset):
         image = cv2.imread(img_name)
         target = self.targets[idx]
         size = self.size[idx]
-        print(idx)
+        print(img_name)
         
         if(self.transform is not None):
             target = BBtrans()(target, size)
