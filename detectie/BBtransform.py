@@ -73,6 +73,7 @@ class BBtrans(Dataset):
                 counter = counter - 1
                 
             counter = counter + 1
+        print(target['boxes'])
         target['boxes'] = b
         target['labels'] = l
         
