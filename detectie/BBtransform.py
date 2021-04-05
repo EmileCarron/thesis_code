@@ -15,66 +15,67 @@ class BBtrans(Dataset):
     #def __init__(self):
     
     
-    def __call__(self, target, targettrans):
-        
+#    def __call__(self, target, targettrans):
+#
+#        counter = 0
+#        for x in target['boxes']:
+#            #print(target)
+#            #print(targettrans)
+#            x[0] = targettrans['boxes'][counter][0]
+#            x[1] = targettrans['boxes'][counter][1]
+#            x[2] = targettrans['boxes'][counter][2]
+#            x[3] = targettrans['boxes'][counter][3]
+#            counter = counter + 1
+#
+#        #print(target)
+#        #print(targettrans)
+#
+#        return target
+   
+    def __call__(self, target, size):
+        size1 = size["size"][0]
+        w = size["size"][0][0]
+        h = size["size"][0][1]
+#        print(size1)
+#        print(w, h)
+#        print(target)
         counter = 0
+        #import pdb; pdb.set_trace()
+        b = target['boxes']
+        l = target['labels']
+        #y = t[:, np.r_[:1, 3:]]
+        #t = torch.cat((y[:,:3], y[:,4:]))
+        #y = np.delete(t, 2, 0)
         for x in target['boxes']:
-            #print(target)
-            #print(targettrans)
-            x[0] = targettrans['boxes'][counter][0]
-            x[1] = targettrans['boxes'][counter][1]
-            x[2] = targettrans['boxes'][counter][2]
-            x[3] = targettrans['boxes'][counter][3]
+            x1 = x[0]
+            y1 = x[1]
+            x2 = x[2]
+            y2 = x[3]
+            
+            if x2 >= w:
+                b = np.delete(b, counter, 0)
+                l = np.delete(l, counter, 0)
+                counter = counter - 1
+
+            if y2 >= h:
+                b = np.delete(b, counter, 0)
+                l = np.delete(l, counter, 0)
+                counter = counter - 1
+                
+            if x1 >= x2:
+                b = np.delete(b, counter, 0)
+                l = np.delete(l, counter, 0)
+                counter = counter - 1
+            
+            if y1 >= y2:
+                b = np.delete(b, counter, 0)
+                l = np.delete(l, counter, 0)
+                counter = counter - 1
+                
             counter = counter + 1
+        target['boxes'] = b
+        target['labels'] = l
         
         #print(target)
-        #print(targettrans)
-        
         return target
-   
-#    def __call__(self, target, size, image):
-#        h = image.size()[1]
-#        w = image.size()[2]
-#        #print(target)
-#        for x in target['boxes']:
-#            x1 = x[0]
-#            y1 = x[1]
-#            x2 = x[2]
-#            y2 = x[3]
-#
-#            if h > w:
-#                new_h, new_w = size * h / w, size
-#            else:
-#                new_h, new_w = size, size * w / h
-#
-#            newx1 = x1 * (new_w / w)
-#            newy1 = y1 * (new_h / h)
-#            newx2 = x2 * (new_w / w)
-#            newy2 = y2 * (new_h / h)
-#
-#            if newx1 >= 300:
-#                newx1 = 299
-#
-#            if newx2 >= 300:
-#                newx2 = 300
-#
-#            if newy1 >= 300:
-#                newy1 = 299
-#
-#            if newy2 >= 300:
-#                newy2 = 300
-#
-#            if newy2 == newy1:
-#                newy1 = newy1 - 0.1
-#
-#            if newx2 == newx1:
-#                newx1 = newx1 - 0.1
-#
-#            x[0] = newx1
-#            x[1] = newy1
-#            x[2] = newx2
-#            x[3] = newy2
-#
-#        #print(target)
-#        return target
-#
+

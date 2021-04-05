@@ -44,6 +44,15 @@ class Sku(Dataset):
             for (image_name, _, _), group
             in groupby
         ]
+        
+        self.size = [
+            {
+            "size": group[['image_width', 'image_height']].values
+            }
+            for (image_name, width, height), group
+            in groupby]
+            
+        #self.img_hight = [image_height in groupby]
 
         self.targets = [
             {
@@ -63,10 +72,10 @@ class Sku(Dataset):
         img_name = os.path.join(self.root_dir, self.images[idx])
         image = cv2.imread(img_name)
         target = self.targets[idx]
+        size = self.size[idx]
         
         if(self.transform is not None):
-            #print(target['boxes'])
-            targettrans = target
+            target = BBtrans()(target, size)
             transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
             image = transformed['image']
             target['boxes'] = torch.tensor(transformed['bboxes'])
@@ -75,7 +84,7 @@ class Sku(Dataset):
             image = ToTensor()(pil_image)
             #print(type(target))
             #print(target)
-            #target = BBtrans()(target, targettrans)
+            #target = BBtrans()(target, image)
             
             #print(target['boxes'][0])
             #print(target['boxes'][0][0])
