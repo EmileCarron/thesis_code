@@ -36,7 +36,7 @@ class BBtrans(Dataset):
         size1 = size["size"][0]
         w = size["size"][0][0]
         h = size["size"][0][1]
-        print(size1)
+        #print(size1)
 #        print(w, h)
 #        print(target)
         counter = 0
@@ -73,7 +73,7 @@ class BBtrans(Dataset):
                 counter = counter - 1
                 
             counter = counter + 1
-        print(target['boxes'])
+        #print(target['boxes'])
         target['boxes'] = b
         target['labels'] = l
         
