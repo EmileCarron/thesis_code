@@ -118,7 +118,7 @@ class RecognitionModel(pl.LightningModule):
 
         
         self.log("loss_validation_class", loss, on_step=True, on_epoch=True)
-        
+        self.log({"examples": [wandb.Image(numpy_array_or_pil, caption="Label")]})
         return loss
 
 
