@@ -118,7 +118,7 @@ if __name__ == '__main__':
     parser.add_argument('--weight_decay', type=float, default=1e-5)
     parser.add_argument('--momentum', type=float, default=0.95)
     parser.add_argument('--lr', type=float, default=1e-3)
-    parser.add_argument('--batch_size', type=int, default=1)
+    parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--data_dir', type=str, default='../../../dataset')
     parser.add_argument('--optim', type=str, default='SGD')
     parser.add_argument('--loss', type=str, default= 'CrossEntropy',

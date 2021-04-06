@@ -42,36 +42,36 @@ class RecognitionModel(pl.LightningModule):
 
 
         if self.args.loss == 'CrossEntropy':
-                self.loss = torch.nn.CrossEntropyLoss()
-                self.loss_requires_classifier = True
+            self.loss = torch.nn.CrossEntropyLoss()
+            self.loss_requires_classifier = True
             
         elif self.args.loss == 'ArcFace':
-                self.loss = losses.ArcFaceLoss(
-                margin=0.5,
-                embedding_size=self.classifier.fc.in_features,
-                num_classes=self.classifier.fc.out_features
-                )
-                self.loss_requires_classifier = False
+            self.loss = losses.ArcFaceLoss(
+            margin=0.5,
+            embedding_size=self.classifier.fc.in_features,
+            num_classes=self.classifier.fc.out_features
+            )
+            self.loss_requires_classifier = False
             
         elif self.args.loss == 'ContrastiveLoss':
-                self.loss = losses.ContrastiveLoss(
-                pos_margin=0,
-                neg_margin=1
-                )
-                self.loss_requires_classifier = False            
-            
+            self.loss = losses.ContrastiveLoss(
+            pos_margin=0,
+            neg_margin=1
+            )
+            self.loss_requires_classifier = False
+        
 
         elif self.args.loss == 'TripletMargin':
-                self.loss = losses.TripletMarginLoss(
-                margin=0.1
-                )
-                self.loss_requires_classifier = False
+            self.loss = losses.TripletMarginLoss(
+            margin=0.1
+            )
+            self.loss_requires_classifier = False
  
         elif self.args.loss == 'CircleLoss':
-                self.loss = losses.CircleLoss(m=0.4,
-                gamma=80
-                )
-                self.loss_requires_classifier = False
+            self.loss = losses.CircleLoss(m=0.4,
+            gamma=80
+            )
+            self.loss_requires_classifier = False
             
         else:
             raise ValueError(f'Unsupported loss: {self.args.loss}')
@@ -90,19 +90,19 @@ class RecognitionModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, labels = batch
         
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         out = torch.squeeze(self(x))
         #labels = torch.squeeze(labels)
         
         if self.loss_requires_classifier:
             out = self.model(x)
-        out2 = self.model(x)
-        print(out.size())
-        print(labels.size())
+        #out = self.model(x)
+        #print(out.size())
+        #print(labels.size())
         
-        print(out2.size())
-        print(labels.size())
-        loss = self.loss(out, labels)
+        #print(out2.size())
+        #print(labels.size())
+        #loss = self.loss(out, labels)
         accuracy = self.accuracy(out, labels)
 
         self.log("loss_training_class", loss, on_step=True, on_epoch=True)
