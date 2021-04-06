@@ -96,7 +96,12 @@ class RecognitionModel(pl.LightningModule):
         
         if self.loss_requires_classifier:
             out = self.model(x)
-
+        out2 = self.model(x)
+        print(out.size())
+        print(labels.size())
+        
+        print(out2.size())
+        print(labels.size())
         loss = self.loss(out, labels)
         accuracy = self.accuracy(out, labels)
 
@@ -118,7 +123,7 @@ class RecognitionModel(pl.LightningModule):
 
         
         self.log("loss_validation_class", loss, on_step=True, on_epoch=True)
-        self.log({"examples": [wandb.Image(numpy_array_or_pil, caption="Label")]})
+        #self.log({"examples": [wandb.Image(numpy_array_or_pil, caption="Label")]})
         return loss
 
 

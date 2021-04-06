@@ -61,6 +61,7 @@ class AliproductsDataModule(pl.LightningDataModule):
             for img in json.load(fObj)['images']
         ]
         self.img_dir = self.root + '/train'
+        #print(len(self.img_labels))
         self.num_classes = 195
     
     def get_transform(self, normalize=True, to_tensor=True):
@@ -107,6 +108,7 @@ def main(args):
     model = RecognitionModel(args)
    
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
+    #import pdb; pdb.set_trace()
     trainer.fit(model, dm)
 
 if __name__ == '__main__':
