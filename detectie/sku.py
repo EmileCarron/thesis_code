@@ -30,11 +30,6 @@ class Sku(Dataset):
         self.df = pd.read_csv(csv_file, names=COLUMN_NAMES)
         self.root_dir = root_dir
         self.transform = transform
-#        self.transform = A.Compose([
-#                            A.RandomCrop(width=1333, height=800),
-#                            A.HorizontalFlip(p=0.5),
-#                            A.RandomBrightnessContrast(p=0.2),
-#                            ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
                             
         groupby = list(self.df.groupby(['image_name',
                                    'image_width',
@@ -52,8 +47,6 @@ class Sku(Dataset):
             for (image_name, width, height), group
             in groupby]
             
-        #self.img_hight = [image_height in groupby]
-
         self.targets = [
             {
             "boxes": group[['x1', 'y1', 'x2', 'y2']].values,
@@ -73,7 +66,6 @@ class Sku(Dataset):
         image = cv2.imread(img_name)
         target = self.targets[idx]
         size = self.size[idx]
-        print(img_name)
         
         if(self.transform is not None):
             target = BBtrans()(target, size)
@@ -83,17 +75,6 @@ class Sku(Dataset):
             target['labels'] = torch.tensor(transformed['class_labels'])
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
-            #print(type(target))
-            #print(target)
-            #target = BBtrans()(target, image)
-            
-            #print(target['boxes'][0])
-            #print(target['boxes'][0][0])
-            #print(target['labels'])
-            #print(target['boxes'])
-            
-            #print("goede loop")
-     
     
         return image, target
         
