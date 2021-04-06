@@ -56,7 +56,8 @@ def main(args):
     model = RetinaNetLightning(args)
     dm = RetinaNetDataModule()
     
-    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=1, logger=wandb_logger)
+    trainer = pl.Trainer.from_argparse_args(args, logger=wandb_logger, gpus=1 if torch.cuda.is_available() else 0)
+    #trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=1, logger=wandb_logger)
     trainer.fit(model, dm)
     
 
@@ -68,5 +69,6 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=1e-3)
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--data_dir', type=str, default='../../../dataset')
+    parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
     main(args)
