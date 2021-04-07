@@ -70,7 +70,7 @@ class Sku(Dataset):
         #import pdb; pdb.set_trace()
         if(self.transform is not None):
             target = BBtrans()(target, size)
-            target2 = BBtrans()(target2, size)
+            #target2 = BBtrans()(target2, size)
             transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
             image = transformed['image']
             target['boxes'] = torch.tensor(transformed['bboxes'])
