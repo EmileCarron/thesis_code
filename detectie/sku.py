@@ -72,7 +72,7 @@ class Sku(Dataset):
             transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
             image = transformed['image']
             target['boxes'] = torch.tensor(transformed['bboxes'])
-            if target['boxes'].size() is 0:
+            if target['boxes'].size()[0] is 0:
                 print("fuck")
             print(target['boxes'].size()[0])
             target['labels'] = torch.tensor(transformed['class_labels'])
