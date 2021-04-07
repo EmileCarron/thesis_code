@@ -18,7 +18,7 @@ class RetinaNetLightning(pl.LightningModule):
         self.save_hyperparameters()
         
     def training_step(self, batch, batch_idx):
-        #import pdb; pdb.set_trace()
+        #open s 
         x, y = batch
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])
@@ -30,15 +30,15 @@ class RetinaNetLightning(pl.LightningModule):
         self.log("loss_training", tot, on_step=True, on_epoch=True)
         return losses['classification'] + losses['bbox_regression']
         
-    def validation_step(self, batch, batch_idx):
-        x, y = batch
-        y = [{'boxes': b, 'labels': l}
-        for b, l in zip(y['boxes'],y['labels'])
-        ]
-        detections = self.model(x,y)
-        #print(losses[0]['scores'])
-        #loss = torch.argmax(losses[0]['scores'])
-        #self.log("valid_score", loss, on_step=True, on_epoch=True)
+#    def validation_step(self, batch, batch_idx):
+#        x, y = batch
+#        y = [{'boxes': b, 'labels': l}
+#        for b, l in zip(y['boxes'],y['labels'])
+#        ]
+#        detections = self.model(x,y)
+#        #print(losses[0]['scores'])
+#        #loss = torch.argmax(losses[0]['scores'])
+#        #self.log("valid_score", loss, on_step=True, on_epoch=True)
        
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr = self.args.lr,
