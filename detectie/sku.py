@@ -66,7 +66,7 @@ class Sku(Dataset):
         image = cv2.imread(img_name)
         target = self.targets[idx]
         size = self.size[idx]
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         if(self.transform is not None):
             target = BBtrans()(target, size)
             transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
