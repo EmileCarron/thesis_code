@@ -60,7 +60,7 @@ class RecognitionModel(pl.LightningModule):
             )
             self.loss_requires_classifier = False
         
-
+        #smapler toevoegen!!!! 
         elif self.args.loss == 'TripletMargin':
             self.loss = losses.TripletMarginLoss(
             margin=0.1
@@ -90,7 +90,7 @@ class RecognitionModel(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, labels = batch
         
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         out = torch.squeeze(self(x))
         #labels = torch.squeeze(labels)
         
@@ -102,11 +102,11 @@ class RecognitionModel(pl.LightningModule):
         
         #print(out2.size())
         #print(labels.size())
-        #loss = self.loss(out, labels)
+        loss = self.loss(out, labels)
         accuracy = self.accuracy(out, labels)
 
-        self.log("loss_training_class", loss, on_step=True, on_epoch=True)
-        self.log("accuaracy_training_class", accuracy, on_step=True, on_epoch=True)
+        self.log("loss_training", loss, on_step=True, on_epoch=True)
+        self.log("accuaracy_training", accuracy, on_step=False, on_epoch=True)
  
         return loss
           
@@ -122,7 +122,7 @@ class RecognitionModel(pl.LightningModule):
         labels = labels.cpu().numpy()
 
         
-        self.log("loss_validation_class", loss, on_step=True, on_epoch=True)
+        self.log("loss_validation", loss, on_step=True, on_epoch=True)
         #self.log({"examples": [wandb.Image(numpy_array_or_pil, caption="Label")]})
         return loss
 
