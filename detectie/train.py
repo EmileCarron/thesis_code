@@ -56,8 +56,8 @@ def main(args):
     model = RetinaNetLightning(args)
     dm = RetinaNetDataModule()
     
-    trainer = pl.Trainer.from_argparse_args(args, logger=wandb_logger, gpus=1 if torch.cuda.is_available() else 0)
-    #trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=1, logger=wandb_logger)
+    #trainer = pl.Trainer.from_argparse_args(args, logger=wandb_logger, gpus=1 if torch.cuda.is_available() else 0)
+    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=1, logger=wandb_logger)
     trainer.fit(model, dm)
     
 

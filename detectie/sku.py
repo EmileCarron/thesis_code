@@ -72,8 +72,10 @@ class Sku(Dataset):
             transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
             image = transformed['image']
             target['boxes'] = torch.tensor(transformed['bboxes'])
+            if target['boxes'].shape is "torch.Size([0])":
+                print("fuck")
+            print(target['boxes'].shape)
             target['labels'] = torch.tensor(transformed['class_labels'])
-            print()
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
     
