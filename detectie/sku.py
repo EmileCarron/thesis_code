@@ -73,6 +73,7 @@ class Sku(Dataset):
             image = transformed['image']
             target['boxes'] = torch.tensor(transformed['bboxes'])
             target['labels'] = torch.tensor(transformed['class_labels'])
+            print()
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
     
