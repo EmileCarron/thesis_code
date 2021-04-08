@@ -31,14 +31,14 @@ class RetinaNetDataModule(pl.LightningDataModule):
                             A.ShiftScaleRotate(p=0.5),
                             A.RandomBrightnessContrast(p=0.2),
                             A.RGBShift(p=0.2),
-                            A.RandomCrop(width=1333, height=800),
+                            A.RandomSizedBBoxSafeCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
             self.val_set = Sku(csv_file = self.data_dir + '/annotations/annotations_val.csv', root_dir = self.data_dir + '/images', transform = A.Compose([
                             A.HorizontalFlip(p=0.5),
                             A.ShiftScaleRotate(p=0.5),
                             A.RandomBrightnessContrast(p=0.2),
                             A.RGBShift(p=0.2),
-                            A.RandomCrop(width=1333, height=800),
+                            A.RandomSizedBBoxSafeCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
         
     def train_dataloader(self):
@@ -57,7 +57,7 @@ def main(args):
     dm = RetinaNetDataModule()
     
     #trainer = pl.Trainer.from_argparse_args(args, logger=wandb_logger, gpus=1 if torch.cuda.is_available() else 0)
-    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=1, logger=wandb_logger)
+    trainer = pl.Trainer(max_epochs=1, logger=wandb_logger)
     trainer.fit(model, dm)
     
 
