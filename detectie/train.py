@@ -31,14 +31,14 @@ class RetinaNetDataModule(pl.LightningDataModule):
                             A.ShiftScaleRotate(p=0.5),
                             A.RandomBrightnessContrast(p=0.2),
                             A.RGBShift(p=0.2),
-                            A.RandomSizedBBoxSafeCrop(width=1333, height=800),
+                            A.RandomCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
             self.val_set = Sku(csv_file = self.data_dir + '/annotations/annotations_val.csv', root_dir = self.data_dir + '/images', transform = A.Compose([
                             A.HorizontalFlip(p=0.5),
                             A.ShiftScaleRotate(p=0.5),
                             A.RandomBrightnessContrast(p=0.2),
                             A.RGBShift(p=0.2),
-                            A.RandomSizedBBoxSafeCrop(width=1333, height=800),
+                            A.RandomCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
         
     def train_dataloader(self):
