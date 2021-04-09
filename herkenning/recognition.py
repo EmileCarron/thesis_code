@@ -12,16 +12,19 @@ from collections import OrderedDict
 from torchvision.models import resnet, resnet18
 from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
 from pytorch_metric_learning import losses
-#import pdb; pdb.set_trace()
+
+
 
 
 class RecognitionModel(pl.LightningModule):
 
     def __init__(self,args):
+    
         super().__init__()
         self.model = torchvision.models.resnet18(pretrained=True)
         self.model.fc = nn.Linear(512, 195, True)
         self.args = args
+        #print(self.model)
         
         self.extractor = torch.nn.Sequential(
             OrderedDict(
@@ -30,11 +33,13 @@ class RecognitionModel(pl.LightningModule):
          
         )
 
+        #print(self.extractor)
         self.classifier = torch.nn.Sequential(
             OrderedDict(
                 list(self.model.named_children())[-1:]
             )
         )
+
 
         if self.args.loss == 'CrossEntropy':
             self.loss = torch.nn.CrossEntropyLoss()
@@ -84,11 +89,19 @@ class RecognitionModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, labels = batch
+        
+        #import pdb; pdb.set_trace()
         out = torch.squeeze(self(x))
+        #labels = torch.squeeze(labels)
         
         if self.loss_requires_classifier:
             out = self.model(x)
-
+        #out = self.model(x)
+        #print(out.size())
+        #print(labels.size())
+        
+        #print(out2.size())
+        #print(labels.size())
         loss = self.loss(out, labels)
         accuracy = self.accuracy(out, labels)
 
@@ -107,9 +120,12 @@ class RecognitionModel(pl.LightningModule):
         loss = self.loss(out, labels)
 
         labels = labels.cpu().numpy()
+
         
         self.log("loss_validation", loss, on_step=True, on_epoch=True)
+        #self.log({"examples": [wandb.Image(numpy_array_or_pil, caption="Label")]})
         return loss
+
 
     def configure_optimizers(self):
         if self.args.optim == 'Adam':

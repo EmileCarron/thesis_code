@@ -17,6 +17,10 @@ from torchvision.transforms import Scale
 COLUMN_NAMES = ['image_name', 'classe', 'group']
   
 class Prod10k(Dataset):
+      
+    # This function prints the type
+    # of the object passed as well
+    # as the object item
     def __init__(self,csv_file, root_dir, transform=None):
         self.df = pd.read_csv(csv_file, names=COLUMN_NAMES)
         self.root_dir = root_dir
@@ -50,4 +54,10 @@ class Prod10k(Dataset):
             image = RandomResizedCrop(300)(image)
     
         return image
+        
+# Driver code
+#train_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '../../../datasets/sku110k/images')
 
+#train_set[0]
+#train_set[1000]
+#train_set[100000]

@@ -20,6 +20,7 @@ from pytorch_lightning.loggers import WandbLogger
 
 
 
+
 BASE_URL = ("https://tianchi-public-us-east-download.oss-us-east-1."
             "aliyuncs.com/231780/")
 
@@ -60,6 +61,7 @@ class AliproductsDataModule(pl.LightningDataModule):
             for img in json.load(fObj)['images']
         ]
         self.img_dir = self.root + '/train'
+        #print(len(self.img_labels))
         self.num_classes = 195
     
     def get_transform(self, normalize=True, to_tensor=True):
@@ -99,18 +101,18 @@ class AliproductsDataModule(pl.LightningDataModule):
         return DataLoader(self.val_set, batch_size = self.batch_size, num_workers = self.num_workers)
 
 def main(args):
+
     wandb_logger = WandbLogger()
-    wandb.init(project = 'masterproef', entity = 'mille')
-    
+    wandb.init(project='thesis', entity='mille')
     dm = AliproductsDataModule(data_dir = args.data_dir ,batch_size = args.batch_size, num_workers = args.num_workers)
     model = RecognitionModel(args)
    
     trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
+    #import pdb; pdb.set_trace()
     trainer.fit(model, dm)
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    
     parser.add_argument('--num_workers', type=int, default=12)
     parser.add_argument('--max_epochs', type=int, default=1)
     parser.add_argument('--weight_decay', type=float, default=1e-5)
@@ -125,6 +127,6 @@ if __name__ == '__main__':
                                      'TripletMargin', 'ContrastiveLoss',
                                      'CircleLoss', 'LargeMarginSoftmaxLoss'])
     parser.add_argument('--embedding_size', type=int, default=512)
-    
+
     args = parser.parse_args()
     main(args)

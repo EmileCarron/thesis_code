@@ -103,10 +103,13 @@ class AliProducts(Dataset):
 
     def __getitem__(self, index):
         img, label = self.img_labels[index]
+        #path = self.img_dir / label / img
         im = Image.open(self.img_dir / label / img).convert('RGB')
     
         if self.transform is not None:
             im = self.transform(im)
+            #im = ToTensor()(im)
+            #print(im)
         return (im, self.label_idxs[label])
 
     def __len__(self):
