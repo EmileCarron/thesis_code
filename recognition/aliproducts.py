@@ -1,6 +1,6 @@
 from torch.utils.data import Dataset
-from torchvision.datasets.utils import (download_and_extract_archive,
-                                        download_url)
+from torchvision.datasets.utils import download_url#(download_and_extract_archive,)
+                                        
 from pathlib import Path
 import json
 from PIL import Image

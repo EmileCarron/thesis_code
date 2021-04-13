@@ -11,7 +11,7 @@ import sys
 from argparse import ArgumentParser
 from recognition import RecognitionModel
 import json
-from torchvision.datasets.utils import (download_and_extract_archive, download_url)
+from torchvision.datasets.utils import download_url#)download_and_extract_archive,
 from aliproducts import AliProducts
 from PIL import Image
 from copy import deepcopy
@@ -82,9 +82,9 @@ class AliproductsDataModule(pl.LightningDataModule):
         return transforms.Compose(tfms)
 
     
-    def prepare_data(self):
-        download_and_extract_archive(SAMPLE_DATA_URL['data'], self.root)
-        download_url(SAMPLE_DATA_URL['json'], self.root)
+    #def prepare_data(self):
+        #download_and_extract_archive(SAMPLE_DATA_URL['data'], self.root)
+        #download_url(SAMPLE_DATA_URL['json'], self.root)
     
     def setup(self, stage=None):
         train_tfm = self.get_transform()
