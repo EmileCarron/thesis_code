@@ -55,7 +55,7 @@ class RecognitionModel(pl.LightningModule):
             )
             self.loss_requires_classifier = False
         
-        #smapler toevoegen!!!! 
+        #sampler toevoegen!!!! 
         elif self.args.loss == 'TripletMargin':
             self.loss = losses.TripletMarginLoss(
             margin=0.1
