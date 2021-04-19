@@ -1,3 +1,5 @@
+import sys
+import os
 import torch
 from torch import nn 
 from torch import optim
@@ -8,17 +10,18 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from torch.optim import SGD
 from sku import Sku
+from torchvision import models
 
 
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
         super().__init__()
-        self.model = torchvision.models.detection.retinanet_resnet50_fpn(pretrained=True)
+        self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
         self.args = args
         self.save_hyperparameters()
         
     def training_step(self, batch, batch_idx):
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         x, y = batch
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])

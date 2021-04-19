@@ -68,6 +68,11 @@ class Sku(Dataset):
         target2 = self.targets[idx]
         size = self.size[idx]
         #import pdb; pdb.set_trace()
+        # if(self.transform is not None):
+        #     target = BBtrans()(target, size)
+        #     pil_image=Image.fromarray(image)
+        #     self.transform(pil_image,target)
+        #     ToTensor(pil_image,target)
         if(self.transform is not None):
             target = BBtrans()(target, size)
             #target2 = BBtrans()(target2, size)
