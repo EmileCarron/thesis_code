@@ -4,6 +4,7 @@ channels:
   - anaconda
   - conda-forge
   - defaults
+  - metric-learning
 dependencies:
   - pytorch-lightning
   - torchvision
@@ -13,3 +14,4 @@ dependencies:
   - wandb
   - imgaug
   - albumentations
+  - pytorch-metric-learning
