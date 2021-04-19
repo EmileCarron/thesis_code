@@ -41,6 +41,7 @@ class RetinaNetDataModule(pl.LightningDataModule):
                             A.RGBShift(p=0.2),
                             A.RandomSizedBBoxSafeCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
+            self.val_set, test_set = torch.utils.data.random_split(self.val_set, [10, len(self.val_set)-10])
         
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = args.num_workers)
