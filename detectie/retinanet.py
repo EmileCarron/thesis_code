@@ -34,7 +34,7 @@ class RetinaNetLightning(pl.LightningModule):
         return losses['classification'] + losses['bbox_regression']
         
     def validation_step(self, batch, batch_idx):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         x, y = batch
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])
