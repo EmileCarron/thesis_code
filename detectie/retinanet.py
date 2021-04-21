@@ -42,7 +42,7 @@ class RetinaNetLightning(pl.LightningModule):
         detections = self.model(x,y)
         #print(losses[0]['scores'])
         #loss = torch.argmax(losses[0]['scores'])
-        self.log("valid_score", loss, on_step=True, on_epoch=True)
+        #self.log("valid_score", loss, on_step=True, on_epoch=True)
        
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr = self.args.lr,
