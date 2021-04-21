@@ -21,7 +21,7 @@ class RetinaNetDataModule(pl.LightningDataModule):
     
     def __init__(self):
         super().__init__()
-        self.data_dir = args.data_dir + '/SKU110K_fixed'
+        self.data_dir = args.data_dir + '/SKU110K'
         self.batch_size = args.batch_size
         
     def setup(self, stage=None):
