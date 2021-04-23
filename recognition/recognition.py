@@ -12,6 +12,7 @@ from collections import OrderedDict
 from torchvision.models import resnet, resnet18
 from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
 from pytorch_metric_learning import losses
+import wandb
 #import pdb; pdb.set_trace()
 
 
@@ -19,14 +20,14 @@ class RecognitionModel(pl.LightningModule):
 
     def __init__(self,args):
         super().__init__()
-        ckpt = '../../../Masterproef/thesis_code/recognition/wandb/run-20210409_112741-28fdpx5s/files/thesis/28fdpx5s/checkpoints/epoch=299-step=18899.ckpt' 
+        #ckpt = '../../../Masterproef/thesis_code/recognition/wandb/run-20210409_112741-28fdpx5s/files/thesis/28fdpx5s/checkpoints/epoch=299-step=18899.ckpt' 
         
         self.model = torchvision.models.resnet18(pretrained=True)
         self.model.fc = nn.Linear(512, 195, True)
         self.args = args
-      # if len(self.args.checkpoint) != 0:
-       # self.model = RecognitionModel.load_from_checkpoint(ckpt)                    
+        #self.model = wandb.restore('masterproef/2zf8e0nu/checkpoints/epoch=999-step=62999.ckpt',run_path='mille/masterproef/2zf8e0nu')
         
+
         self.extractor = torch.nn.Sequential(
             OrderedDict(
                 list(self.model.named_children())[:-1]

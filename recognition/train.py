@@ -121,6 +121,8 @@ def main(args):
 
     
     dm = AliproductsDataModule(data_dir = args.data_dir ,batch_size = args.batch_size, num_workers = args.num_workers)
+    #model = wandb.restore('masterproef/2zf8e0nu/checkpoints/epoch=999-step=62999.ckpt',run_path='mille/masterproef/2zf8e0nu')
+
     model = RecognitionModel(args)
 
     # checkpoint = ModelCheckpoint(
@@ -132,7 +134,7 @@ def main(args):
     #     mode='min'
     # )
    
-    trainer = pl.Trainer(experiment=exp,gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
+    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
     trainer.fit(model, dm)
 
 if __name__ == '__main__':
