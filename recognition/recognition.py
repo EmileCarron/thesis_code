@@ -19,9 +19,15 @@ class RecognitionModel(pl.LightningModule):
 
     def __init__(self,args):
         super().__init__()
+        ckpt = '../../../Masterproef/thesis_code/recognition/wandb/run-20210409_112741-28fdpx5s/files/thesis/28fdpx5s/checkpoints/epoch=299-step=18899.ckpt' 
+        
         self.model = torchvision.models.resnet18(pretrained=True)
+        #self.model = RecognitionModel.load_from_checkpoint(ckpt,args=args)
         self.model.fc = nn.Linear(512, 195, True)
         self.args = args
+      # if len(self.args.checkpoint) != 0:
+        
+                    
         
         self.extractor = torch.nn.Sequential(
             OrderedDict(

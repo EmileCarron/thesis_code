@@ -125,6 +125,7 @@ if __name__ == '__main__':
                                      'TripletMargin', 'ContrastiveLoss',
                                      'CircleLoss', 'LargeMarginSoftmaxLoss'])
     parser.add_argument('--embedding_size', type=int, default=512)
+    #parser.add_argument('--checkpoint', type=str, default='')
     
     args = parser.parse_args()
     main(args)
