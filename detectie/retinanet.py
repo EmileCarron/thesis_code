@@ -51,7 +51,7 @@ class RetinaNetLightning(pl.LightningModule):
             # no need to download the backbone if pretrained is set
             pretrained_backbone = False
         # skip P2 because it generates too many anchors (according to their paper)
-        backbone = resnet_fpn_backbone('resnet50', pretrained_backbone, returned_layers=[2, 3, 4],
+        backbone = resnet_fpn_backbone('resnet18', pretrained_backbone, returned_layers=[2, 3, 4],
                                        extra_blocks=LastLevelP6P7(256, 256), trainable_layers=trainable_backbone_layers)
         return backbone
         
