@@ -17,10 +17,6 @@ from PIL import Image
 from copy import deepcopy
 import wandb
 from pytorch_lightning.loggers import WandbLogger
-#from test_tube import Experiment
-#from pytorch_lightning.callbacks import ModelCheckpoint
-
-
 
 BASE_URL = ("https://tianchi-public-us-east-download.oss-us-east-1."
             "aliyuncs.com/231780/")
@@ -83,11 +79,6 @@ class AliproductsDataModule(pl.LightningDataModule):
 
         return transforms.Compose(tfms)
 
-    
-    #def prepare_data(self):
-        #download_and_extract_archive(SAMPLE_DATA_URL['data'], self.root)
-        #download_url(SAMPLE_DATA_URL['json'], self.root)
-    
     def setup(self, stage=None):
         train_tfm = self.get_transform()
         if stage == 'fit' or stage is None:
@@ -104,38 +95,19 @@ def main(args):
     wandb_logger = WandbLogger()
     wandb.init(project = 'masterproef', entity = 'mille')
 
-    # exp = Experiment(
-    #     name='test_tube_exp',
-    #     debug=True,
-    #     save_dir='/checkpoint/',
-    #     version=0,
-    #     autosave=False,
-    #     description='test demo'
-    # )
-
-    # set the hparams for the experiment
-    # exp.argparse(args)
-    # exp.save()
-    
-    
-
-    
     dm = AliproductsDataModule(data_dir = args.data_dir ,batch_size = args.batch_size, num_workers = args.num_workers)
-    #model = wandb.restore('masterproef/2zf8e0nu/checkpoints/epoch=999-step=62999.ckpt',run_path='mille/masterproef/2zf8e0nu')
-
     model = RecognitionModel(args)
-
-    # checkpoint = ModelCheckpoint(
-    #     filepath='/checkpoint/weights.ckpt',
-    #     save_function=None,
-    #     save_best_only=True,
-    #     verbose=True,
-    #     monitor='val_loss',
-    #     mode='min'
-    # )
-   
-    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
-    trainer.fit(model, dm)
+    
+    if len(args.checkpoint) != 0:
+        print("checkpoint: " + args.checkpoint)
+        new_model = model.load_from_checkpoint(checkpoint_path=args.checkpoint, args=args)
+        trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
+        trainer.fit(new_model, dm)
+        trainer.save_checkpoint("test1_checkpoint.ckpt")
+    else: 
+        trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
+        trainer.fit(model, dm)
+        trainer.save_checkpoint("test_checkpoint.ckpt")
 
 if __name__ == '__main__':
     parser = ArgumentParser()
@@ -154,7 +126,7 @@ if __name__ == '__main__':
                                      'TripletMargin', 'ContrastiveLoss',
                                      'CircleLoss', 'LargeMarginSoftmaxLoss'])
     parser.add_argument('--embedding_size', type=int, default=512)
-    #parser.add_argument('--checkpoint', type=str, default='')
+    parser.add_argument('--checkpoint', type=str, default='')
     
     args = parser.parse_args()
     main(args)

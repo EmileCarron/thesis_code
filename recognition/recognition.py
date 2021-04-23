@@ -25,8 +25,6 @@ class RecognitionModel(pl.LightningModule):
         self.model = torchvision.models.resnet18(pretrained=True)
         self.model.fc = nn.Linear(512, 195, True)
         self.args = args
-        #self.model = wandb.restore('masterproef/2zf8e0nu/checkpoints/epoch=999-step=62999.ckpt',run_path='mille/masterproef/2zf8e0nu')
-        
 
         self.extractor = torch.nn.Sequential(
             OrderedDict(
