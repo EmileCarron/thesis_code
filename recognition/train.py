@@ -17,6 +17,7 @@ from PIL import Image
 from copy import deepcopy
 import wandb
 from pytorch_lightning.loggers import WandbLogger
+from test_tube import Experiment
 
 
 
@@ -102,10 +103,13 @@ def main(args):
     wandb_logger = WandbLogger()
     wandb.init(project = 'masterproef', entity = 'mille')
     
+    exp = Experiment(version=a_previous_version_with_a_saved_checkpoint)
+
+    
     dm = AliproductsDataModule(data_dir = args.data_dir ,batch_size = args.batch_size, num_workers = args.num_workers)
     model = RecognitionModel(args)
    
-    trainer = pl.Trainer(gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
+    trainer = pl.Trainer(experiment=exp,gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
     trainer.fit(model, dm)
 
 if __name__ == '__main__':
