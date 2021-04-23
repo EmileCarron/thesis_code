@@ -17,7 +17,8 @@ from PIL import Image
 from copy import deepcopy
 import wandb
 from pytorch_lightning.loggers import WandbLogger
-from test_tube import Experiment
+#from test_tube import Experiment
+#from pytorch_lightning.callbacks import ModelCheckpoint
 
 
 
@@ -102,12 +103,34 @@ class AliproductsDataModule(pl.LightningDataModule):
 def main(args):
     wandb_logger = WandbLogger()
     wandb.init(project = 'masterproef', entity = 'mille')
+
+    # exp = Experiment(
+    #     name='test_tube_exp',
+    #     debug=True,
+    #     save_dir='/checkpoint/',
+    #     version=0,
+    #     autosave=False,
+    #     description='test demo'
+    # )
+
+    # set the hparams for the experiment
+    # exp.argparse(args)
+    # exp.save()
     
-    exp = Experiment(version=a_previous_version_with_a_saved_checkpoint)
+    
 
     
     dm = AliproductsDataModule(data_dir = args.data_dir ,batch_size = args.batch_size, num_workers = args.num_workers)
     model = RecognitionModel(args)
+
+    # checkpoint = ModelCheckpoint(
+    #     filepath='/checkpoint/weights.ckpt',
+    #     save_function=None,
+    #     save_best_only=True,
+    #     verbose=True,
+    #     monitor='val_loss',
+    #     mode='min'
+    # )
    
     trainer = pl.Trainer(experiment=exp,gpus=1 if torch.cuda.is_available() else 0, max_epochs=args.max_epochs, logger=wandb_logger)
     trainer.fit(model, dm)
