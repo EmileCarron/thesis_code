@@ -44,6 +44,12 @@ class RetinaNetLightning(pl.LightningModule):
         # overwrite_eps(self.model, 0.0)
         self.args = args
         self.save_hyperparameters()
+        self.teacher = teacher()
+
+    def teacher(self):
+        teacher = model.load_from_checkpoint(checkpoint_path=args.checkpoint, args=args)
+        return teacher
+
 
     def backbone1(self, pretrained_backbone, pretrained=False, trainable_backbone_layers=None):
         trainable_backbone_layers = _validate_trainable_layers(
@@ -67,6 +73,7 @@ class RetinaNetLightning(pl.LightningModule):
         boxes = y[0]['boxes'].int()
         for idx in boxes:
             image = torchvision.transforms.functional.crop(x, idx[0], idx[1], idx[3]-idx[1], idx[2]-idx[0])
+            predection = self.teacher.model(image)
             #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
             #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
 
