@@ -63,20 +63,13 @@ class RetinaNetLightning(pl.LightningModule):
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])
         ]
+        
         boxes = y[0]['boxes'].int()
         for idx in boxes:
-            x1 = idx[0]
-            y1 = idx[1]
-            x2 = idx[2]
-            y2 = idx[3]
+            image = torchvision.transforms.functional.crop(x, idx[0], idx[1], idx[3]-idx[1], idx[2]-idx[0])
+            #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
+            #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
 
-            height = y2-y1
-            width = x2-x1 
-            image = torchvision.transforms.functional.crop(x, x1, y1, height, width)
-            self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
-            self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
-
-        #image = tf.image.crop_to_bounding_box( x, 500, 100, 100, 100)
         losses = self.model(x,y)
         tot = losses['classification'] + losses['bbox_regression']
         self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
