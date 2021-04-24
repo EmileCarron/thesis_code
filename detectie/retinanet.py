@@ -17,6 +17,8 @@ from torchvision.models.detection.backbone_utils import _validate_trainable_laye
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 from torchvision.models.utils import load_state_dict_from_url
 from torchvision.models.detection._utils import overwrite_eps
+import wandb
+#import tensorflow as tf
 
 model_urls = {
     'retinanet_resnet50_fpn_coco':
@@ -56,11 +58,25 @@ class RetinaNetLightning(pl.LightningModule):
         return backbone
         
     def training_step(self, batch, batch_idx):
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         x, y = batch
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])
         ]
+        boxes = y[0]['boxes'].int()
+        for idx in boxes:
+            x1 = idx[0]
+            y1 = idx[1]
+            x2 = idx[2]
+            y2 = idx[3]
+
+            height = y2-y1
+            width = x2-x1 
+            image = torchvision.transforms.functional.crop(x, x1, y1, height, width)
+            self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
+            self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
+
+        #image = tf.image.crop_to_bounding_box( x, 500, 100, 100, 100)
         losses = self.model(x,y)
         tot = losses['classification'] + losses['bbox_regression']
         self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
