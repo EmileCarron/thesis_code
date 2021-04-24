@@ -86,6 +86,8 @@ class RecognitionModel(pl.LightningModule):
 
 
     def training_step(self, batch, batch_idx):
+        import pdb; pdb.set_trace()
+
         x, labels = batch
         out = torch.squeeze(self(x))
         
