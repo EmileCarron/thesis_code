@@ -65,26 +65,13 @@ class Sku(Dataset):
         img_name = os.path.join(self.root_dir, self.images[idx])
         image = cv2.imread(img_name)
         target = self.targets[idx]
-        target2 = self.targets[idx]
         size = self.size[idx]
         #import pdb; pdb.set_trace()
-        # if(self.transform is not None):
-        #     target = BBtrans()(target, size)
-        #     pil_image=Image.fromarray(image)
-        #     self.transform(pil_image,target)
-        #     ToTensor(pil_image,target)
         if(self.transform is not None):
             target = BBtrans()(target, size)
-            #target2 = BBtrans()(target2, size)
             transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
             image = transformed['image']
             target['boxes'] = torch.tensor(transformed['bboxes'])
-            if target['boxes'].size()[0] is 0:
-                print(transformed['bboxes'])
-                print(target2['boxes'])
-                print(img_name)
-                #target['boxes'] = np.array([[1,1,2,2]])
-            #print(target['boxes'].size()[0])
             target['labels'] = torch.tensor(transformed['class_labels'])
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
