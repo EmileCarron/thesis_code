@@ -79,6 +79,7 @@ class RecognitionModel(pl.LightningModule):
 
 
     def accuracy(self, logits, labels):
+        import pdb; pdb.set_trace()
         _, predicted = torch.max(logits.data, 1)
         correct = (predicted == labels).sum().item()
         accuracy = correct / len(labels)
@@ -86,7 +87,7 @@ class RecognitionModel(pl.LightningModule):
 
 
     def training_step(self, batch, batch_idx):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         x, labels = batch
         out = torch.squeeze(self(x))
