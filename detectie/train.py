@@ -71,6 +71,12 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=1e-3)
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--data_dir', type=str, default='../../../dataset')
+    parser.add_argument('--checkpoint', type=str, default='')
+    parser.add_argument('--loss', type=str, default= 'CrossEntropy',
+                            help='The name of the loss function to use.',
+                            choices=['CrossEntropy', 'ArcFace',
+                                     'TripletMargin', 'ContrastiveLoss',
+                                     'CircleLoss', 'LargeMarginSoftmaxLoss'])
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
     main(args)

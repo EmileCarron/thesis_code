@@ -18,6 +18,7 @@ from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 from torchvision.models.utils import load_state_dict_from_url
 from torchvision.models.detection._utils import overwrite_eps
 import wandb
+from collections import OrderedDict
 #import tensorflow as tf
 
 model_urls = {
@@ -26,7 +27,64 @@ model_urls = {
 }
 
 
+class RecognitionModel(pl.LightningModule):
 
+    def __init__(self,args):
+        super().__init__()
+        #ckpt = '../../../Masterproef/thesis_code/recognition/wandb/run-20210409_112741-28fdpx5s/files/thesis/28fdpx5s/checkpoints/epoch=299-step=18899.ckpt' 
+        
+        self.model = torchvision.models.resnet18(pretrained=True)
+        self.model.fc = nn.Linear(512, 195, True)
+        self.args = args
+
+        self.extractor = torch.nn.Sequential(
+            OrderedDict(
+                list(self.model.named_children())[:-1]
+            ),
+         
+        )
+
+        self.classifier = torch.nn.Sequential(
+            OrderedDict(
+                list(self.model.named_children())[-1:]
+            )
+        )
+
+        if self.args.loss == 'CrossEntropy':
+            self.loss = torch.nn.CrossEntropyLoss()
+            self.loss_requires_classifier = True
+            
+        elif self.args.loss == 'ArcFace':
+            self.loss = losses.ArcFaceLoss(
+            margin=0.5,
+            embedding_size=self.classifier.fc.in_features,
+            num_classes=self.classifier.fc.out_features
+            )
+            self.loss_requires_classifier = False
+            
+        elif self.args.loss == 'ContrastiveLoss':
+            self.loss = losses.ContrastiveLoss(
+            pos_margin=0,
+            neg_margin=1
+            )
+            self.loss_requires_classifier = False
+        
+        #sampler toevoegen!!!! 
+        elif self.args.loss == 'TripletMargin':
+            self.loss = losses.TripletMarginLoss(
+            margin=0.1
+            )
+            self.loss_requires_classifier = False
+ 
+        elif self.args.loss == 'CircleLoss':
+            self.loss = losses.CircleLoss(m=0.4,
+            gamma=80
+            )
+            self.loss_requires_classifier = False
+            
+        else:
+            raise ValueError(f'Unsupported loss: {self.args.loss}')
+            
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
         super().__init__()
@@ -44,11 +102,12 @@ class RetinaNetLightning(pl.LightningModule):
         # overwrite_eps(self.model, 0.0)
         self.args = args
         self.save_hyperparameters()
-        self.teacher = teacher()
-
-    def teacher(self):
-        teacher = model.load_from_checkpoint(checkpoint_path=args.checkpoint, args=args)
-        return teacher
+        self.teacher_model = self.teacher(args)
+    4
+    def teacher(self, args):
+        teacher = RecognitionModel(args)
+        teacher_model = teacher.load_from_checkpoint(checkpoint_path=args.checkpoint, args=args)
+        return teacher_model
 
 
     def backbone1(self, pretrained_backbone, pretrained=False, trainable_backbone_layers=None):
@@ -73,7 +132,7 @@ class RetinaNetLightning(pl.LightningModule):
         boxes = y[0]['boxes'].int()
         for idx in boxes:
             image = torchvision.transforms.functional.crop(x, idx[0], idx[1], idx[3]-idx[1], idx[2]-idx[0])
-            predection = self.teacher.model(image)
+            predection = self.teacher_model.eval(image)
             #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
             #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
 
