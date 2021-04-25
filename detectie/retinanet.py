@@ -138,25 +138,16 @@ class RetinaNetLightning(pl.LightningModule):
         
         boxes = y[0]['boxes'].int()
         counter = 0
-        for idx in boxes:
-            x1 = idx[0]
-            y1 = idx[1]
-            x2 = idx[2]
-            y2 = idx[3]
-
-            height = y2-y1
-            width = x2-x1 
-            image = torchvision.transforms.functional.crop(x, y1, x1, height, width)
+        for idx in boxes: 
+            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], idx[3]-idx[1], idx[2]-idx[0])
             self.tm.eval()
             predictions = self.tm(image)
             _, predicted = torch.max(predictions.data, 1)
             y[0]['labels'][counter] = predicted 
             counter = counter + 1
 
-
-
-            self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
-            self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
+            #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
+            #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
 
         import pdb; pdb.set_trace()
 
@@ -174,7 +165,6 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         detections = self.model(x,y)
-        #print(losses[0]['scores'])
         #loss = torch.argmax(detections[0]['scores'])
         #self.log("valid_score", detections[0]['scores'][0], on_step=True, on_epoch=True)
         return detections
