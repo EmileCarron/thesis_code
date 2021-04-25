@@ -84,6 +84,9 @@ class RecognitionModel(pl.LightningModule):
             
         else:
             raise ValueError(f'Unsupported loss: {self.args.loss}')
+
+    def get_model(self):
+        return self.model
             
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
@@ -100,10 +103,14 @@ class RetinaNetLightning(pl.LightningModule):
         #                                       progress=True)
         # self.model.load_state_dict(state_dict)
         # overwrite_eps(self.model, 0.0)
+        #self.teacher_model = torchvision.models.resnet18(pretrained=True)
+
         self.args = args
         self.save_hyperparameters()
         self.teacher_model = self.teacher(args)
-    4
+        self.tm = self.teacher_model.get_model()
+        #self.teacher_model.train(False)
+
     def teacher(self, args):
         teacher = RecognitionModel(args)
         teacher_model = teacher.load_from_checkpoint(checkpoint_path=args.checkpoint, args=args)
@@ -131,10 +138,20 @@ class RetinaNetLightning(pl.LightningModule):
         
         boxes = y[0]['boxes'].int()
         for idx in boxes:
-            image = torchvision.transforms.functional.crop(x, idx[0], idx[1], idx[3]-idx[1], idx[2]-idx[0])
-            predection = self.teacher_model.eval(image)
-            #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
-            #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
+            x1 = idx[0]
+            y1 = idx[1]
+            x2 = idx[2]
+            y2 = idx[3]
+
+            height = y2-y1
+            width = x2-x1 
+            image = torchvision.transforms.functional.crop(x, y1, x1, height, width)
+            self.tm.eval()
+            predictions = self.tm(image)
+            _, predicted = torch.max(predictions.data, 1)
+
+            self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
+            self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
 
         losses = self.model(x,y)
         tot = losses['classification'] + losses['bbox_regression']
