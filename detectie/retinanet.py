@@ -97,7 +97,7 @@ class RetinaNetLightning(pl.LightningModule):
         )
         self.backbone = self.backbone1(False)
         #self.backbone.fc = nn.Linear(512, 2, True)
-        self.model = models.detection.RetinaNet(self.backbone, num_classes = 2)
+        self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
         #self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
         # state_dict = load_state_dict_from_url(model_urls['retinanet_resnet50_fpn_coco'],
         #                                       progress=True)
@@ -130,13 +130,14 @@ class RetinaNetLightning(pl.LightningModule):
         return backbone
         
     def training_step(self, batch, batch_idx):
-        import pdb; pdb.set_trace()
+        
         x, y = batch
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])
         ]
         
         boxes = y[0]['boxes'].int()
+        counter = 0
         for idx in boxes:
             x1 = idx[0]
             y1 = idx[1]
@@ -149,9 +150,15 @@ class RetinaNetLightning(pl.LightningModule):
             self.tm.eval()
             predictions = self.tm(image)
             _, predicted = torch.max(predictions.data, 1)
+            y[0]['labels'][counter] = predicted 
+            counter = counter + 1
+
+
 
             self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
             self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
+
+        import pdb; pdb.set_trace()
 
         losses = self.model(x,y)
         tot = losses['classification'] + losses['bbox_regression']
