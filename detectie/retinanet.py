@@ -142,10 +142,10 @@ class RetinaNetLightning(pl.LightningModule):
             height = idx[3]-idx[1]
             width = idx[2]-idx[0]
             if height < 7:
-                import pdb; pdb.set_trace()
+                #import pdb; pdb.set_trace()
                 height = 7
             if width < 7:
-                import pdb; pdb.set_trace()
+                #import pdb; pdb.set_trace()
                 width = 7
 
             image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
