@@ -138,8 +138,17 @@ class RetinaNetLightning(pl.LightningModule):
         
         boxes = y[0]['boxes'].int()
         counter = 0
-        for idx in boxes: 
-            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], idx[3]-idx[1], idx[2]-idx[0])
+        for idx in boxes:
+            height = idx[3]-idx[1]
+            width = idx[2]-idx[0]
+            if height < 7:
+                import pdb; pdb.set_trace()
+                height = 7
+            if width < 7:
+                import pdb; pdb.set_trace()
+                width = 7
+
+            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
             self.tm.eval()
             predictions = self.tm(image)
             _, predicted = torch.max(predictions.data, 1)
@@ -149,7 +158,7 @@ class RetinaNetLightning(pl.LightningModule):
             #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
             #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
 
-        import pdb; pdb.set_trace()
+        
 
         losses = self.model(x,y)
         tot = losses['classification'] + losses['bbox_regression']
