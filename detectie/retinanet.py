@@ -174,7 +174,7 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
         detections = self.model(x,y)
-        if detections[0]['scores'].size() != torch.Size([0]):
+        #if detections[0]['scores'].size() != torch.Size([0]):
             #self.log("valid_score", detections[0]['scores'][0], on_step=True, on_epoch=True)
 
         #self.log("valid_score", detections[0]['scores'][0], on_step=True, on_epoch=True)
