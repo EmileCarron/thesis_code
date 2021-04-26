@@ -33,7 +33,7 @@ class RetinaNetDataModule(pl.LightningDataModule):
                             A.RGBShift(p=0.2),
                             A.RandomSizedBBoxSafeCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
-            self.train_set, test_set = torch.utils.data.random_split(self.train_set, [500, len(self.train_set)-500])
+            self.train_set, test_set = torch.utils.data.random_split(self.train_set, [5000, len(self.train_set)-5000])
             self.val_set = Sku(csv_file = self.data_dir + '/annotations/annotations_val.csv', root_dir = self.data_dir + '/images', transform = A.Compose([
                             A.HorizontalFlip(p=0.5),
                             A.ShiftScaleRotate(p=0.5),
@@ -41,7 +41,7 @@ class RetinaNetDataModule(pl.LightningDataModule):
                             A.RGBShift(p=0.2),
                             A.RandomSizedBBoxSafeCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
-            self.val_set, test_set = torch.utils.data.random_split(self.val_set, [50, len(self.val_set)-50])
+            self.val_set, test_set = torch.utils.data.random_split(self.val_set, [500, len(self.val_set)-500])
         
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = args.num_workers)
