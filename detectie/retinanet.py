@@ -138,15 +138,8 @@ class RetinaNetLightning(pl.LightningModule):
         
         boxes = y[0]['boxes'].int()
         counter = 0
-        for idx in boxes:
-            height = idx[3]-idx[1]
-            width = idx[2]-idx[0]
-            if height < 7:
-                height = 7
-            if width < 7:
-                width = 7
-
-            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
+        for idx in boxes: 
+            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], idx[3]-idx[1], idx[2]-idx[0])
             self.tm.eval()
             predictions = self.tm(image)
             _, predicted = torch.max(predictions.data, 1)
