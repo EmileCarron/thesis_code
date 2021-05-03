@@ -50,7 +50,7 @@ class Sku(Dataset):
         self.targets = [
             {
             "boxes": group[['x1', 'y1', 'x2', 'y2']].values,
-            "labels": np.array([1]*len(group)),
+            "labels": np.array([0]*len(group)),
             }
             for (image_name, width, height), group
             in groupby]
