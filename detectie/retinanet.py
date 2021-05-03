@@ -36,7 +36,7 @@ class RetinaNetLightning(pl.LightningModule):
                 aspect_ratios=((0.5, 1.0, 2.0),)
         )
         self.backbone = self.backbone1(False)
-        self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
+        self.model = models.detection.RetinaNet(self.backbone, num_classes = 1)
 
         self.args = args
         self.save_hyperparameters()
