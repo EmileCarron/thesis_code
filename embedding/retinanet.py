@@ -31,7 +31,6 @@ class RecognitionModel(pl.LightningModule):
 
     def __init__(self,args):
         super().__init__()
-        #ckpt = '../../../Masterproef/thesis_code/recognition/wandb/run-20210409_112741-28fdpx5s/files/thesis/28fdpx5s/checkpoints/epoch=299-step=18899.ckpt' 
         
         self.model = torchvision.models.resnet18(pretrained=True)
         self.model.fc = nn.Linear(512, 195, True)
@@ -98,13 +97,8 @@ class RetinaNetLightning(pl.LightningModule):
         self.backbone = self.backbone1(False)
         self.cosloss = torch.nn.CosineEmbeddingLoss()
 
-        #self.backbone.fc = nn.Linear(512, 2, True)
         self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
-        #self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
-        # state_dict = load_state_dict_from_url(model_urls['retinanet_resnet50_fpn_coco'],
-        #                                       progress=True)
-        # self.model.load_state_dict(state_dict)
-        # overwrite_eps(self.model, 0.0)
+
         self.bbone = torchvision.models.resnet18(pretrained=True)
 
         self.extractor = torch.nn.Sequential(
@@ -113,111 +107,47 @@ class RetinaNetLightning(pl.LightningModule):
             ),
          
         )
-        #self.extractor.fc = nn.Linear(512, 195, True)
 
         self.args = args
         self.save_hyperparameters()
         self.teacher_model = self.teacher(args)
         self.tm = self.teacher_model.get_model()
-        #self.teacher_model.train(False)
+
 
     def teacher(self, args):
         teacher = RecognitionModel(args)
         teacher_model = teacher.load_from_checkpoint(checkpoint_path=args.checkpoint, args=args)
         return teacher_model
-
-
-    def backbone1(self, pretrained_backbone, pretrained=False, trainable_backbone_layers=None):
-        trainable_backbone_layers = _validate_trainable_layers(
-        pretrained or pretrained_backbone, trainable_backbone_layers, 5, 3)
-
-        if pretrained:
-            # no need to download the backbone if pretrained is set
-            pretrained_backbone = False
-        # skip P2 because it generates too many anchors (according to their paper)
-        backbone = resnet_fpn_backbone('resnet18', pretrained_backbone, returned_layers=[2, 3, 4],
-                                       extra_blocks=LastLevelP6P7(256, 256), trainable_layers=trainable_backbone_layers)
-        return backbone
         
-    def training_step(self, batch, batch_idx):
-        import pdb; pdb.set_trace()
-        x, y = batch
-        y = [{'boxes': b, 'labels': l, 'embedding': e}
-        for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
-        ]
-        
-        boxes = y[0]['boxes'].int()
-        counter = 0
-        for idx in boxes:
-            height = idx[3]-idx[1]
-            width = idx[2]-idx[0]
-            if height < 7:
-                #import pdb; pdb.set_trace()
-                height = 7
-            if width < 7:
-                #import pdb; pdb.set_trace()
-                width = 7
-
-            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
-            self.tm.eval()
-            predictions = self.tm(image)
-            _, predicted = torch.max(predictions.data, 1)
-            y[0]['labels'][counter] = predicted 
-            predictionsmod = predictions.clone()
-            predictionsmod = torch.squeeze(predictionsmod)
-            lossesresnet = self.extractor(image)
-            cosinetensor = torch.tensor([-1]*512)
-            lossesresnet = torch.squeeze(lossesresnet)
-            coslos = self.cosloss(predictionsmod,lossesresnet,cosinetensor)
-            
-
-
-            #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
-            #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
-
-        
-
-        losses = self.model(x,y)
-        tot = losses['classification'] + losses['bbox_regression']
-        self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
-        self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
-        self.log("loss_training", tot, on_step=True, on_epoch=True)
-        return losses['classification'] + losses['bbox_regression']
-        
-    def validation_step(self, batch, batch_idx):
+    def embeddings(self, train_set):
         #import pdb; pdb.set_trace()
-        x, y = batch
-        y = [{'boxes': b, 'labels': l, 'embedding': e}
-        for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
-        ]
+        for train_idx in range(len(train_set)):
+            x, y = train_set[train_idx]
+            y = [{'boxes': b, 'labels': l, 'embedding': e}
+            for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
+            ]
 
-        boxes = y[0]['boxes'].int()
-        counter = 0
-        for idx in boxes:
-            height = idx[3]-idx[1]
-            width = idx[2]-idx[0]
-            if height < 7:
-                #import pdb; pdb.set_trace()
-                height = 7
-            if width < 7:
-                #import pdb; pdb.set_trace()
-                width = 7
-
-            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
-            self.tm.eval()
-            predictions = self.tm(image)
-            _, predicted = torch.max(predictions.data, 1)
-            y[0]['labels'][counter] = predicted 
-            #y[0]['embedding'][counter] = predictions
+            boxes = y[0]['boxes'].int()
+            counter = 0
+            for idx in range(len(boxes)):
                 
-            counter = counter + 1
+                height = boxes[idx][3]-boxes[idx][1]
+                width = boxes[idx][2]-boxes[idx][0]
+                if height < 7:
+                    #import pdb; pdb.set_trace()
+                    height = 7
+                if width < 7:
+                    #import pdb; pdb.set_trace()
+                    width = 7
 
-        detections = self.model(x,y)
-        #if detections[0]['scores'].size() != torch.Size([0]):
-            #self.log("valid_score", detections[0]['scores'][0], on_step=True, on_epoch=True)
-
-        #self.log("valid_score", detections[0]['scores'][0], on_step=True, on_epoch=True)
-        return detections
+                image = torchvision.transforms.functional.crop(x, boxes[idx][1], boxes[idx][0], height, width)
+                self.tm.eval()
+                embedding_path = self.data_dir + '/annotations/embeddings/embedding' + train_idx + '_' + counter
+                predictions = self.tm(image)
+                _, predicted = torch.max(predictions.data, 1)
+                y[0]['labels'][counter] = predicted 
+                torch.save(predictions, embedding_path)
+                counter = counter + 1
        
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr = self.args.lr,
