@@ -10,4 +10,5 @@ debug.py
 /herkenning/recognition/lightning_logs/
 /herkenning/recognition/wandb
 /.DS_Store
-/recognition/wandb
+/embedding/wandb
+
