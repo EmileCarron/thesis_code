@@ -86,7 +86,7 @@ class RecognitionModel(pl.LightningModule):
             raise ValueError(f'Unsupported loss: {self.args.loss}')
 
     def get_model(self):
-        return self.model
+        return self.extractor
             
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
@@ -96,6 +96,8 @@ class RetinaNetLightning(pl.LightningModule):
                 aspect_ratios=((0.5, 1.0, 2.0),)
         )
         self.backbone = self.backbone1(False)
+        self.cosloss = torch.nn.CosineEmbeddingLoss()
+
         #self.backbone.fc = nn.Linear(512, 2, True)
         self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
         #self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
@@ -103,7 +105,15 @@ class RetinaNetLightning(pl.LightningModule):
         #                                       progress=True)
         # self.model.load_state_dict(state_dict)
         # overwrite_eps(self.model, 0.0)
-        #self.teacher_model = torchvision.models.resnet18(pretrained=True)
+        self.bbone = torchvision.models.resnet18(pretrained=True)
+
+        self.extractor = torch.nn.Sequential(
+            OrderedDict(
+                list(self.bbone.named_children())[:-1]
+            ),
+         
+        )
+        #self.extractor.fc = nn.Linear(512, 195, True)
 
         self.args = args
         self.save_hyperparameters()
@@ -130,10 +140,10 @@ class RetinaNetLightning(pl.LightningModule):
         return backbone
         
     def training_step(self, batch, batch_idx):
-        
+        import pdb; pdb.set_trace()
         x, y = batch
-        y = [{'boxes': b, 'labels': l}
-        for b, l in zip(y['boxes'],y['labels'])
+        y = [{'boxes': b, 'labels': l, 'embedding': e}
+        for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
         ]
         
         boxes = y[0]['boxes'].int()
@@ -153,7 +163,14 @@ class RetinaNetLightning(pl.LightningModule):
             predictions = self.tm(image)
             _, predicted = torch.max(predictions.data, 1)
             y[0]['labels'][counter] = predicted 
-            counter = counter + 1
+            predictionsmod = predictions.clone()
+            predictionsmod = torch.squeeze(predictionsmod)
+            lossesresnet = self.extractor(image)
+            cosinetensor = torch.tensor([-1]*512)
+            lossesresnet = torch.squeeze(lossesresnet)
+            coslos = self.cosloss(predictionsmod,lossesresnet,cosinetensor)
+            
+
 
             #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
             #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
@@ -170,9 +187,31 @@ class RetinaNetLightning(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         #import pdb; pdb.set_trace()
         x, y = batch
-        y = [{'boxes': b, 'labels': l}
-        for b, l in zip(y['boxes'],y['labels'])
+        y = [{'boxes': b, 'labels': l, 'embedding': e}
+        for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
         ]
+
+        boxes = y[0]['boxes'].int()
+        counter = 0
+        for idx in boxes:
+            height = idx[3]-idx[1]
+            width = idx[2]-idx[0]
+            if height < 7:
+                #import pdb; pdb.set_trace()
+                height = 7
+            if width < 7:
+                #import pdb; pdb.set_trace()
+                width = 7
+
+            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
+            self.tm.eval()
+            predictions = self.tm(image)
+            _, predicted = torch.max(predictions.data, 1)
+            y[0]['labels'][counter] = predicted 
+            #y[0]['embedding'][counter] = predictions
+                
+            counter = counter + 1
+
         detections = self.model(x,y)
         #if detections[0]['scores'].size() != torch.Size([0]):
             #self.log("valid_score", detections[0]['scores'][0], on_step=True, on_epoch=True)
