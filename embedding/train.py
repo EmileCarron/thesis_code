@@ -11,8 +11,6 @@ import sku
 from sku import Sku
 from retinanet import RetinaNetLightning
 import sys
-import wandb
-from pytorch_lightning.loggers import WandbLogger
 from argparse import ArgumentParser
 import albumentations as A
 
@@ -36,13 +34,10 @@ class RetinaNetDataModule(pl.LightningDataModule):
 
 def main(args):
 
-    wandb_logger = WandbLogger()
-    wandb.init(project='thesis', entity='mille')
-
     model = RetinaNetLightning(args)
     dm = RetinaNetDataModule()
     
-    model.embedding(self.train_set
+    model.embedding(self.train_set)
 
 if __name__ == '__main__':
     parser = ArgumentParser()

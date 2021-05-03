@@ -17,7 +17,6 @@ from torchvision.models.detection.backbone_utils import _validate_trainable_laye
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 from torchvision.models.utils import load_state_dict_from_url
 from torchvision.models.detection._utils import overwrite_eps
-import wandb
 from collections import OrderedDict
 #import tensorflow as tf
 
