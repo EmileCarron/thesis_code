@@ -50,7 +50,8 @@ class Sku(Dataset):
         self.targets = [
             {
             "boxes": group[['x1', 'y1', 'x2', 'y2']].values,
-            "labels": np.array([0]*len(group))
+            "labels": np.array([1]*len(group)),
+            "embedding": np.array([[[0.1]*195]]*len(group))
             }
             for (image_name, width, height), group
             in groupby]
@@ -73,6 +74,7 @@ class Sku(Dataset):
             image = transformed['image']
             target['boxes'] = torch.tensor(transformed['bboxes'])
             target['labels'] = torch.tensor(transformed['class_labels'])
+            target['embedding'] = torch.tensor(target['embedding'], requires_grad=True)
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
     
