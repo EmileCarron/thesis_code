@@ -105,7 +105,7 @@ class RetinaNetLightning(pl.LightningModule):
         #                                       progress=True)
         # self.model.load_state_dict(state_dict)
         # overwrite_eps(self.model, 0.0)
-        self.bbone = torchvision.models.resnet18(pretrained=True)
+        #self.bbone = torchvision.models.resnet18(pretrained=True)
 
         self.extractor = torch.nn.Sequential(
             OrderedDict(
@@ -165,7 +165,6 @@ class RetinaNetLightning(pl.LightningModule):
             y[0]['labels'][counter] = predicted 
             predictionsmod = predictions.clone()
             predictionsmod = torch.squeeze(predictionsmod)
-            lossesresnet = self.extractor(image)
             cosinetensor = torch.tensor([-1]*512)
             lossesresnet = torch.squeeze(lossesresnet)
             coslos = self.cosloss(predictionsmod,lossesresnet,cosinetensor)
