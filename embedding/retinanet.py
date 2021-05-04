@@ -84,7 +84,7 @@ class RecognitionModel(pl.LightningModule):
             raise ValueError(f'Unsupported loss: {self.args.loss}')
 
     def get_model(self):
-        return self.extractor
+        return self.model
             
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
@@ -94,7 +94,7 @@ class RetinaNetLightning(pl.LightningModule):
                 aspect_ratios=((0.5, 1.0, 2.0),)
         )
         self.backbone = self.backbone1(False)
-        self.cosloss = torch.nn.CosineEmbeddingLoss()
+        
 
         self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
 
@@ -102,7 +102,7 @@ class RetinaNetLightning(pl.LightningModule):
 
         self.extractor = torch.nn.Sequential(
             OrderedDict(
-                list(self.bbone.named_children())[:-1]
+                list(self.backbone.named_children())[:-1]
             ),
          
         )
@@ -111,22 +111,35 @@ class RetinaNetLightning(pl.LightningModule):
         self.save_hyperparameters()
         self.teacher_model = self.teacher(args)
         self.tm = self.teacher_model.get_model()
+        self.data_dir = args.data_dir
 
 
     def teacher(self, args):
         teacher = RecognitionModel(args)
         teacher_model = teacher.load_from_checkpoint(checkpoint_path=args.checkpoint, args=args)
         return teacher_model
+
+    def backbone1(self, pretrained_backbone, pretrained=False, trainable_backbone_layers=None):
+        trainable_backbone_layers = _validate_trainable_layers(
+        pretrained or pretrained_backbone, trainable_backbone_layers, 5, 3)
+
+        if pretrained:
+            # no need to download the backbone if pretrained is set
+            pretrained_backbone = False
+        # skip P2 because it generates too many anchors (according to their paper)
+        backbone = resnet_fpn_backbone('resnet18', pretrained_backbone, returned_layers=[2, 3, 4],
+                                       extra_blocks=LastLevelP6P7(256, 256), trainable_layers=trainable_backbone_layers)
+        return backbone
         
     def embeddings(self, train_set):
-        #import pdb; pdb.set_trace()
         for train_idx in range(len(train_set)):
+            import pdb; pdb.set_trace()
             x, y = train_set[train_idx]
-            y = [{'boxes': b, 'labels': l, 'embedding': e}
-            for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
-            ]
+            #y = [{'boxes': b, 'labels': l}
+            #for b, l in zip(y['boxes'],y['labels'])
+            #]
 
-            boxes = y[0]['boxes'].int()
+            boxes = y['boxes'].int()
             counter = 0
             for idx in range(len(boxes)):
                 
@@ -140,9 +153,10 @@ class RetinaNetLightning(pl.LightningModule):
                     width = 7
 
                 image = torchvision.transforms.functional.crop(x, boxes[idx][1], boxes[idx][0], height, width)
-                self.tm.eval()
-                embedding_path = self.data_dir + '/annotations/embeddings/embedding' + train_idx + '_' + counter
+                #self.tm.eval()
                 predictions = self.tm(image)
+                embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(train_idx) + '_' + str(idx)
+                
                 _, predicted = torch.max(predictions.data, 1)
                 y[0]['labels'][counter] = predicted 
                 torch.save(predictions, embedding_path)

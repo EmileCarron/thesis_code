@@ -31,13 +31,19 @@ class RetinaNetDataModule(pl.LightningDataModule):
                             A.RGBShift(p=0.2),
                             A.RandomSizedBBoxSafeCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
+            return self.train_set
+
+    def __len__(self):
+        return len(self.train_set)
 
 def main(args):
 
+    #import pdb; pdb.set_trace()
+
     model = RetinaNetLightning(args)
     dm = RetinaNetDataModule()
-    
-    model.embedding(self.train_set)
+    train_set = dm.setup()
+    model.embeddings(train_set)
 
 if __name__ == '__main__':
     parser = ArgumentParser()
