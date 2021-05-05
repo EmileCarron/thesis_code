@@ -65,7 +65,6 @@ class Sku(Dataset):
             
         img_name = os.path.join(self.root_dir, self.images[idx])
         image = cv2.imread(img_name)
-        print(img_name)
         target = self.targets[idx]
         size = self.size[idx]
         #import pdb; pdb.set_trace()
