@@ -80,7 +80,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
 
             # compute the classification loss
             loss = (CosineEmbeddingLoss((cls_logits_per_image,
-                targets_per_image['embedding']), (2*y-1).float()))
+                targets_per_image['embedding']), Variable(torch.Tensor(pred_n.size(0)).fill_(1.0))))
 
         return _sum(losses) / len(targets)  
 
