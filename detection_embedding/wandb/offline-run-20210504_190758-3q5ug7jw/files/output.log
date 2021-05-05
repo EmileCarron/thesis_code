@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "train.py", line 78, in <module>
-    main(args)
-  File "train.py", line 54, in main
-    model = RetinaNetLightning(args)
-  File "/Users/emilecarron/projects/thesis/detectie/retinanet.py", line 148, in __init__
-    self.head = HeadJDE(backbone.out_channels, anchor_generator.num_anchors_per_location()[0], 195)
-NameError: name 'backbone' is not defined
