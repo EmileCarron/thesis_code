@@ -39,7 +39,6 @@ class HeadJDE(RetinaNetHead):
 
     def compute_loss(self, targets, head_outputs, anchors, matched_idxs):
         # type: (List[Dict[str, Tensor]], Dict[str, Tensor], List[Tensor], List[Tensor]) -> Dict[str, Tensor]
-        import pdb; pdb.set_trace()
         return {
             'classification': self.classification_head.compute_loss(targets, head_outputs, matched_idxs),
             'bbox_regression': self.regression_head.compute_loss(targets, head_outputs, anchors, matched_idxs),
@@ -51,6 +50,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
         super().__init__(in_channels, num_anchors, num_classes, prior_probability=0.01) 
 
     def compute_loss(self, targets, head_outputs, matched_idxs): 
+        import pdb; pdb.set_trace()
         losses = []
 
         cls_logits = head_outputs['cls_logits']
