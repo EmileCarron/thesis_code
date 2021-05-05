@@ -30,53 +30,6 @@ model_urls = {
         'https://download.pytorch.org/models/retinanet_resnet50_fpn_coco-eeacb38b.pth',
 }
 
-class HeadJDE(RetinaNetHead):
-    def __init__(self, in_channels, num_anchors, num_classes):
-        super().__init__(in_channels, num_anchors, num_classes)
-        self.classification_head = RetinaNetClassificationHead(in_channels, num_anchors, num_classes)
-        self.regression_head = RetinaNetRegressionHead(in_channels, num_anchors)
-        self.embedding_head = RetinaNetEmbeddingHead(in_channels, num_anchors, 512)
-
-    def compute_loss(self, targets, head_outputs, anchors, matched_idxs):
-        # type: (List[Dict[str, Tensor]], Dict[str, Tensor], List[Tensor], List[Tensor]) -> Dict[str, Tensor]
-        import pdb; pdb.set_trace()
-        return {
-            'classification': self.classification_head.compute_loss(targets, head_outputs, matched_idxs),
-            'bbox_regression': self.regression_head.compute_loss(targets, head_outputs, anchors, matched_idxs),
-            'embedding': self.embedding_head.compute_loss(targets, head_outputs, matched_idxs),
-        }
-
-class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
-    def __init__(self, in_channels, num_anchors, num_classes, prior_probability=0.01):
-        super().__init__(in_channels, num_anchors, num_classes, prior_probability=0.01) 
-
-    def compute_loss(self, targets, head_outputs, matched_idxs): 
-        losses = []
-
-        cls_logits = head_outputs['cls_logits']
-
-        for targets_per_image, cls_logits_per_image, matched_idxs_per_image in zip(targets, cls_logits, matched_idxs):
-            # determine only the foreground
-            foreground_idxs_per_image = matched_idxs_per_image >= 0
-            num_foreground = foreground_idxs_per_image.sum()
-
-            # create the target classification
-            gt_classes_target = torch.zeros_like(cls_logits_per_image)
-            gt_classes_target[
-                foreground_idxs_per_image,
-                targets_per_image['embedding'][matched_idxs_per_image[foreground_idxs_per_image]]
-            ] = 1.0
-
-            # find indices for which anchors should be ignored
-            valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
-
-            # compute the classification loss
-            losses.append(CosineEmbeddingLoss(cls_logits_per_image[valid_idxs_per_image],
-                gt_classes_target[valid_idxs_per_image], torch.tensor([-1]*512)))
-
-        return _sum(losses) / len(targets)  
-
-
 class RecognitionModel(pl.LightningModule):
 
     def __init__(self,args):
@@ -137,7 +90,7 @@ class RecognitionModel(pl.LightningModule):
             raise ValueError(f'Unsupported loss: {self.args.loss}')
 
     def get_model(self):
-        return self.extractor
+        return self.model
             
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
@@ -147,10 +100,9 @@ class RetinaNetLightning(pl.LightningModule):
                 aspect_ratios=((0.5, 1.0, 2.0),)
         )
         self.backbone = self.backbone1(False)
-        self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 195)
 
         #self.backbone.fc = nn.Linear(512, 2, True)
-        self.model = models.detection.RetinaNet(self.backbone, num_classes = 195, head= self.head)
+        self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
         #self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
         # state_dict = load_state_dict_from_url(model_urls['retinanet_resnet50_fpn_coco'],
         #                                       progress=True)
@@ -192,54 +144,53 @@ class RetinaNetLightning(pl.LightningModule):
         return backbone
         
     def training_step(self, batch, batch_idx):
-        with torch.no_grad():
+        
+        #import pdb; pdb.set_trace()
+        x, y = batch
+        y = [{'boxes': b, 'labels': l, 'embedding': e}
+        for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
+        ]
+        
+        boxes = y[0]['boxes'].int()
+        counter = 0
+        for idx in boxes:
             #import pdb; pdb.set_trace()
-            x, y = batch
-            y = [{'boxes': b, 'labels': l, 'embedding': e}
-            for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
-            ]
-            
-            boxes = y[0]['boxes'].int()
-            counter = 0
-            for idx in boxes:
+            height = idx[3]-idx[1]
+            width = idx[2]-idx[0]
+            if height < 7:
                 #import pdb; pdb.set_trace()
-                height = idx[3]-idx[1]
-                width = idx[2]-idx[0]
-                if height < 7:
-                    #import pdb; pdb.set_trace()
-                    height = 7
-                if width < 7:
-                    #import pdb; pdb.set_trace()
-                    width = 7
+                height = 7
+            if width < 7:
+                #import pdb; pdb.set_trace()
+                width = 7
 
-                image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
-                self.tm.eval()
-                predictions = self.tm(image)
-                #embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(counter)+'.pt'
-                #torch.save(predictions, embedding_path)
-                _, predicted = torch.max(predictions.data, 1)
-                predictions = torch.squeeze(predictions)
-                y[0]['labels'][counter] = predicted 
-                
-                    #test = torch.no_grad(predictions)
-                y[0]['embedding'][counter] = predictions
-                counter = counter + 1
-                
-                
-
-
-                #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
-                #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
-
+            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
+            self.tm.eval()
+            predictions = self.tm(image)
+            #embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(counter)+'.pt'
+            #torch.save(predictions, embedding_path)
+            _, predicted = torch.max(predictions.data, 1)
+            predictions = torch.squeeze(predictions)
+            y[0]['labels'][counter] = predicted 
+            
+                #test = torch.no_grad(predictions)
+            #y[0]['embedding'][counter] = predictions
+            counter = counter + 1
             
             
 
-            losses = self.model(x,y)
-            tot = losses['classification'] + losses['bbox_regression']
-            self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
-            self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
-            self.log("loss_training", tot, on_step=True, on_epoch=True)
-            return losses['classification'] + losses['bbox_regression']
+
+            #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
+            #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
+
+        
+        
+        losses = self.model(x,y)
+        tot = losses['classification'] + losses['bbox_regression']
+        self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
+        self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
+        self.log("loss_training", tot, on_step=True, on_epoch=True)
+        return losses['classification'] + losses['bbox_regression']
         
     # def validation_step(self, batch, batch_idx):
     #     #import pdb; pdb.set_trace()
