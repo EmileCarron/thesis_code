@@ -45,6 +45,14 @@ class HeadJDE(RetinaNetHead):
             'embedding': self.embedding_head.compute_loss(targets, head_outputs, matched_idxs),
         }
 
+    def forward(self, x):
+        # type: (List[Tensor]) -> Dict[str, Tensor]
+        return {
+            'cls_logits': self.classification_head(x),
+            'bbox_regression': self.regression_head(x),
+            'embedding': self.embedding_head(x),
+        }
+
 class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
     def __init__(self, in_channels, num_anchors, num_classes, prior_probability=0.01):
         super().__init__(in_channels, num_anchors, num_classes, prior_probability=0.01) 
@@ -53,7 +61,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
         import pdb; pdb.set_trace()
         losses = []
 
-        cls_logits = head_outputs['cls_logits']
+        cls_logits = head_outputs['embedding']
 
         for targets_per_image, cls_logits_per_image, matched_idxs_per_image in zip(targets, cls_logits, matched_idxs):
             # determine only the foreground
