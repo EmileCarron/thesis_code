@@ -79,8 +79,8 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
 
             # compute the classification loss
-            loss = (CosineEmbeddingLoss(cls_logits_per_image,
-                targets_per_image['embedding'], torch.tensor([-1]*512)))
+            loss = (CosineEmbeddingLoss((cls_logits_per_image,
+                targets_per_image['embedding']), (2*y-1).float())
 
         return _sum(losses) / len(targets)  
 
