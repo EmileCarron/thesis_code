@@ -70,10 +70,10 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
 
             # create the target classification
             gt_classes_target = torch.zeros_like(cls_logits_per_image)
-            # gt_classes_target[
-            #     foreground_idxs_per_image,
-            #     targets_per_image['embedding'][matched_idxs_per_image[foreground_idxs_per_image]]
-            # ] = 1.0
+            gt_classes_target[
+                foreground_idxs_per_image,
+                targets_per_image['embedding'][matched_idxs_per_image[foreground_idxs_per_image]]
+            ] = 1.0
 
             # find indices for which anchors should be ignored
             valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
