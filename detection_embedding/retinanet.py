@@ -137,6 +137,9 @@ class RecognitionModel(pl.LightningModule):
             raise ValueError(f'Unsupported loss: {self.args.loss}')
 
     def get_model(self):
+        return self.model
+
+    def get_extractor(self):
         return self.extractor
             
 class RetinaNetLightning(pl.LightningModule):
@@ -163,7 +166,8 @@ class RetinaNetLightning(pl.LightningModule):
         self.args = args
         self.save_hyperparameters()
         self.teacher_model = self.teacher(args)
-        self.tm = self.teacher_model.get_model()
+        self.tm_full = self.teacher_model.get_model()
+        self.tm_extractor = self.teacher_model.get_extractor()
         self.data_dir = args.data_dir
         #self.teacher_model.train(False)
 
@@ -207,16 +211,18 @@ class RetinaNetLightning(pl.LightningModule):
                     width = 7
 
                 image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
-                self.tm.eval()
-                predictions = self.tm(image)
+                self.tm_full.eval()
+                self.tm_extractor.eval()
+                predictions = self.tm_full(image)
+                predictions_embedding = self.tm_extractor(image)
                 #embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(counter)+'.pt'
                 #torch.save(predictions, embedding_path)
                 _, predicted = torch.max(predictions.data, 1)
-                predictions = torch.squeeze(predictions)
+                predictions_embedding = torch.squeeze(predictions_embedding)
                 y[0]['labels'][counter] = predicted 
                 
                     #test = torch.no_grad(predictions)
-                y[0]['embedding'][counter] = predictions
+                y[0]['embedding'][counter] = predictions_embedding
                 counter = counter + 1
                 
                 
