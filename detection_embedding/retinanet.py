@@ -39,7 +39,7 @@ class HeadJDE(RetinaNetHead):
 
     def compute_loss(self, targets, head_outputs, anchors, matched_idxs):
         # type: (List[Dict[str, Tensor]], Dict[str, Tensor], List[Tensor], List[Tensor]) -> Dict[str, Tensor]
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         return {
             'classification': self.classification_head.compute_loss(targets, head_outputs, matched_idxs),
             'bbox_regression': self.regression_head.compute_loss(targets, head_outputs, anchors, matched_idxs),
@@ -137,15 +137,20 @@ class RecognitionModel(pl.LightningModule):
             raise ValueError(f'Unsupported loss: {self.args.loss}')
 
     def get_model(self):
+        return self.model
+
+    def get_extractor(self):
         return self.extractor
             
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
         super().__init__()
-        self.anchor_generator = AnchorGenerator(
-                sizes=((32, 64, 128, 256, 512),),
-                aspect_ratios=((0.5, 1.0, 2.0),)
-        )
+        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
+        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+        anchor_generator = AnchorGenerator(
+            anchor_sizes, aspect_ratios
+            )
+        self.anchor_generator = anchor_generator
         self.backbone = self.backbone1(False)
         self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 195)
 
@@ -156,20 +161,14 @@ class RetinaNetLightning(pl.LightningModule):
         #                                       progress=True)
         # self.model.load_state_dict(state_dict)
         # overwrite_eps(self.model, 0.0)
-        self.bbone = torchvision.models.resnet18(pretrained=True)
-
-        self.extractor = torch.nn.Sequential(
-            OrderedDict(
-                list(self.bbone.named_children())[:-1]
-            ),
-         
-        )
+      
         #self.extractor.fc = nn.Linear(512, 195, True)
 
         self.args = args
         self.save_hyperparameters()
         self.teacher_model = self.teacher(args)
-        self.tm = self.teacher_model.get_model()
+        self.tm_full = self.teacher_model.get_model()
+        self.tm_extractor = self.teacher_model.get_extractor()
         self.data_dir = args.data_dir
         #self.teacher_model.train(False)
 
@@ -213,16 +212,18 @@ class RetinaNetLightning(pl.LightningModule):
                     width = 7
 
                 image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
-                self.tm.eval()
-                predictions = self.tm(image)
+                self.tm_full.eval()
+                self.tm_extractor.eval()
+                predictions = self.tm_full(image)
+                predictions_embedding = self.tm_extractor(image)
                 #embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(counter)+'.pt'
                 #torch.save(predictions, embedding_path)
                 _, predicted = torch.max(predictions.data, 1)
-                predictions = torch.squeeze(predictions)
+                predictions_embedding = torch.squeeze(predictions_embedding)
                 y[0]['labels'][counter] = predicted 
                 
                     #test = torch.no_grad(predictions)
-                y[0]['embedding'][counter] = predictions
+                y[0]['embedding'][counter] = predictions_embedding
                 counter = counter + 1
                 
                 
