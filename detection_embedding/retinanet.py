@@ -69,18 +69,18 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             num_foreground = foreground_idxs_per_image.sum()
 
             # create the target classification
-            gt_classes_target = torch.zeros_like(cls_logits_per_image)
-            gt_classes_target[
-                foreground_idxs_per_image,
-                targets_per_image['embedding'][matched_idxs_per_image[foreground_idxs_per_image]]
-            ] = 1.0
+            # gt_classes_target = torch.zeros_like(cls_logits_per_image)
+            # gt_classes_target[
+            #     foreground_idxs_per_image,
+            #     targets_per_image['embedding'][matched_idxs_per_image[foreground_idxs_per_image]]
+            # ] = 1.0
 
             # find indices for which anchors should be ignored
             valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
 
             # compute the classification loss
             losses.append(CosineEmbeddingLoss(cls_logits_per_image[valid_idxs_per_image],
-                gt_classes_target[valid_idxs_per_image], torch.tensor([-1]*512)))
+                targets_per_image['embedding'], torch.tensor([-1]*512)))
 
         return _sum(losses) / len(targets)  
 
