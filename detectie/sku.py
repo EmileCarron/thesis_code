@@ -51,7 +51,7 @@ class Sku(Dataset):
             {
             "boxes": group[['x1', 'y1', 'x2', 'y2']].values,
             "labels": np.array([1]*len(group)),
-            "embedding": np.array([[0.1]*512]*len(group))
+            #"embedding": np.array([[0.1]*512]*len(group))
             }
             for (image_name, width, height), group
             in groupby]
@@ -65,7 +65,7 @@ class Sku(Dataset):
             
         img_name = os.path.join(self.root_dir, self.images[idx])
         image = cv2.imread(img_name)
-        print(img_name)
+        #print(img_name)
         target = self.targets[idx]
         size = self.size[idx]
         #import pdb; pdb.set_trace()
@@ -75,7 +75,7 @@ class Sku(Dataset):
             image = transformed['image']
             target['boxes'] = torch.tensor(transformed['bboxes'])
             target['labels'] = torch.tensor(transformed['class_labels'])
-            target['embedding'] = torch.tensor(target['embedding'], requires_grad=True)
+            #target['embedding'] = torch.tensor(target['embedding'], requires_grad=True)
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
     

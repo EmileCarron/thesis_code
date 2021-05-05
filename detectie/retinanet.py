@@ -147,8 +147,8 @@ class RetinaNetLightning(pl.LightningModule):
         
         #import pdb; pdb.set_trace()
         x, y = batch
-        y = [{'boxes': b, 'labels': l, 'embedding': e}
-        for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
+        y = [{'boxes': b, 'labels': l}
+        for b, l in zip(y['boxes'],y['labels'])
         ]
         
         boxes = y[0]['boxes'].int()
