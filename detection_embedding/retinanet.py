@@ -142,10 +142,12 @@ class RecognitionModel(pl.LightningModule):
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
         super().__init__()
-        self.anchor_generator = AnchorGenerator(
-                sizes=((32, 64, 128, 256, 512),),
-                aspect_ratios=((0.5, 1.0, 2.0),)
-        )
+        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
+        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+        anchor_generator = AnchorGenerator(
+            anchor_sizes, aspect_ratios
+            )
+        self.anchor_generator = anchor_generator
         self.backbone = self.backbone1(False)
         self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 195)
 
@@ -156,15 +158,7 @@ class RetinaNetLightning(pl.LightningModule):
         #                                       progress=True)
         # self.model.load_state_dict(state_dict)
         # overwrite_eps(self.model, 0.0)
-        self.bbone = torchvision.models.resnet18(pretrained=True)
-
-        self.extractor = torch.nn.Sequential(
-            OrderedDict(
-                list(self.bbone.named_children())[:-1]
-            ),
-         
-        )
-        #self.extractor.fc = nn.Linear(512, 195, True)
+        
 
         self.args = args
         self.save_hyperparameters()
