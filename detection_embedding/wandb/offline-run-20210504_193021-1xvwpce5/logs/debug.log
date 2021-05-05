@@ -1,0 +1,46 @@
+2021-05-04 19:30:21,014 INFO    MainThread:9405 [wandb_setup.py:_flush():69] setting env: {}
+2021-05-04 19:30:21,015 INFO    MainThread:9405 [wandb_init.py:_log_setup():319] Logging user logs to /Users/emilecarron/projects/thesis/detectie/wandb/offline-run-20210504_193021-1xvwpce5/logs/debug.log
+2021-05-04 19:30:21,015 INFO    MainThread:9405 [wandb_init.py:_log_setup():320] Logging internal logs to /Users/emilecarron/projects/thesis/detectie/wandb/offline-run-20210504_193021-1xvwpce5/logs/debug-internal.log
+2021-05-04 19:30:21,015 INFO    MainThread:9405 [wandb_init.py:init():352] calling init triggers
+2021-05-04 19:30:21,015 INFO    MainThread:9405 [wandb_init.py:init():359] wandb.init called with sweep_config: {}
+config: {}
+2021-05-04 19:30:21,015 INFO    MainThread:9405 [wandb_init.py:init():401] starting backend
+2021-05-04 19:30:21,015 INFO    MainThread:9405 [backend.py:_multiprocessing_setup():71] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2021-05-04 19:30:21,035 INFO    MainThread:9405 [backend.py:ensure_launched():123] starting backend process...
+2021-05-04 19:30:21,057 INFO    MainThread:9405 [backend.py:ensure_launched():128] started backend process with pid: 9414
+2021-05-04 19:30:21,068 INFO    MainThread:9405 [wandb_init.py:init():406] backend started and connected
+2021-05-04 19:30:21,077 INFO    MainThread:9405 [wandb_init.py:init():446] updated telemetry
+2021-05-04 19:30:21,090 INFO    MainThread:9405 [wandb_init.py:init():503] starting run threads in backend
+2021-05-04 19:30:22,339 INFO    MainThread:9405 [wandb_run.py:_console_start():1422] atexit reg
+2021-05-04 19:30:22,340 INFO    MainThread:9405 [wandb_run.py:_redirect():1285] redirect: SettingsConsole.REDIRECT
+2021-05-04 19:30:22,344 INFO    MainThread:9405 [wandb_run.py:_redirect():1290] Redirecting console.
+2021-05-04 19:30:22,344 INFO    MainThread:9405 [redirect.py:install():213] install start
+2021-05-04 19:30:22,344 INFO    MainThread:9405 [redirect.py:install():228] install stop
+2021-05-04 19:30:22,344 INFO    MainThread:9405 [redirect.py:install():213] install start
+2021-05-04 19:30:22,345 INFO    MainThread:9405 [redirect.py:install():228] install stop
+2021-05-04 19:30:22,345 INFO    MainThread:9405 [wandb_run.py:_redirect():1336] Redirects installed.
+2021-05-04 19:30:22,345 INFO    MainThread:9405 [wandb_init.py:init():527] run started, returning control to user process
+2021-05-04 19:30:29,169 INFO    MainThread:9405 [wandb_run.py:_config_callback():669] config_cb None None {'args/num_workers': 0, 'args/weight_decay': 0, 'args/momentum': 0.95, 'args/lr': 0.001, 'args/batch_size': 1, 'args/data_dir': '/Users/emilecarron/dataset', 'args/checkpoint': 'epoch=999-step=62999.ckpt', 'args/loss': 'CrossEntropy', 'args/logger': True, 'args/checkpoint_callback': True, 'args/default_root_dir': 'None', 'args/gradient_clip_val': 0, 'args/process_position': 0, 'args/num_nodes': 1, 'args/num_processes': 1, 'args/gpus': 'None', 'args/auto_select_gpus': False, 'args/tpu_cores': 'None', 'args/log_gpu_memory': 'None', 'args/progress_bar_refresh_rate': 'None', 'args/overfit_batches': 0.0, 'args/track_grad_norm': -1, 'args/check_val_every_n_epoch': 1, 'args/fast_dev_run': False, 'args/accumulate_grad_batches': 1, 'args/max_epochs': 1, 'args/min_epochs': 'None', 'args/max_steps': 'None', 'args/min_steps': 'None', 'args/limit_train_batches': 1.0, 'args/limit_val_batches': 1.0, 'args/limit_test_batches': 1.0, 'args/limit_predict_batches': 1.0, 'args/val_check_interval': 1.0, 'args/flush_logs_every_n_steps': 100, 'args/log_every_n_steps': 50, 'args/accelerator': 'None', 'args/sync_batchnorm': False, 'args/precision': 32, 'args/weights_summary': 'top', 'args/weights_save_path': 'None', 'args/num_sanity_val_steps': 2, 'args/truncated_bptt_steps': 'None', 'args/resume_from_checkpoint': 'None', 'args/profiler': 'None', 'args/benchmark': False, 'args/deterministic': False, 'args/reload_dataloaders_every_epoch': False, 'args/auto_lr_find': False, 'args/replace_sampler_ddp': True, 'args/terminate_on_nan': False, 'args/auto_scale_batch_size': False, 'args/prepare_data_per_node': True, 'args/plugins': 'None', 'args/amp_backend': 'native', 'args/amp_level': 'O2', 'args/distributed_backend': 'None', 'args/automatic_optimization': 'None', 'args/move_metrics_to_cpu': False, 'args/enable_pl_optimizer': 'None', 'args/multiple_trainloader_mode': 'max_size_cycle', 'args/stochastic_weight_avg': False}
+2021-05-04 19:46:21,193 INFO    MainThread:9405 [wandb_run.py:_atexit_cleanup():1392] got exitcode: 1
+2021-05-04 19:46:21,199 INFO    MainThread:9405 [wandb_run.py:_restore():1364] restore
+2021-05-04 19:46:21,199 INFO    MainThread:9405 [redirect.py:uninstall():232] uninstall start
+2021-05-04 19:46:21,201 INFO    MainThread:9405 [redirect.py:_stop():287] _stop: stdout
+2021-05-04 19:46:21,208 INFO    stdout    :9405 [redirect.py:_pipe_relay():129] relay done saw last write: stdout
+2021-05-04 19:46:21,208 INFO    MainThread:9405 [redirect.py:_stop():293] _stop closed: stdout
+2021-05-04 19:46:21,208 INFO    stdout    :9405 [redirect.py:_pipe_relay():145] relay done done: stdout
+2021-05-04 19:46:21,209 INFO    MainThread:9405 [redirect.py:_stop():299] _stop joined: stdout
+2021-05-04 19:46:21,209 INFO    MainThread:9405 [redirect.py:_stop():301] _stop rd closed: stdout
+2021-05-04 19:46:21,209 INFO    MainThread:9405 [redirect.py:uninstall():236] uninstall done
+2021-05-04 19:46:21,209 INFO    MainThread:9405 [redirect.py:uninstall():232] uninstall start
+2021-05-04 19:46:21,209 INFO    MainThread:9405 [redirect.py:_stop():287] _stop: stderr
+2021-05-04 19:46:21,210 INFO    MainThread:9405 [redirect.py:_stop():293] _stop closed: stderr
+2021-05-04 19:46:21,210 INFO    stderr    :9405 [redirect.py:_pipe_relay():129] relay done saw last write: stderr
+2021-05-04 19:46:21,210 INFO    stderr    :9405 [redirect.py:_pipe_relay():145] relay done done: stderr
+2021-05-04 19:46:21,210 INFO    MainThread:9405 [redirect.py:_stop():299] _stop joined: stderr
+2021-05-04 19:46:21,210 INFO    MainThread:9405 [redirect.py:_stop():301] _stop rd closed: stderr
+2021-05-04 19:46:21,210 INFO    MainThread:9405 [redirect.py:uninstall():236] uninstall done
+2021-05-04 19:46:21,225 INFO    MainThread:9405 [wandb_run.py:_wait_for_finish():1515] got exit ret: 
+2021-05-04 19:46:23,236 INFO    MainThread:9405 [wandb_run.py:_wait_for_finish():1515] got exit ret: done: true
+exit_result {
+}
+

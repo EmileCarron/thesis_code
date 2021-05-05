@@ -1,0 +1,1136 @@
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+
+  | Name             | Type                | Params
+---------------------------------------------------------
+0 | anchor_generator | AnchorGenerator     | 0     
+1 | backbone         | BackboneWithFPN     | 14.3 M
+2 | cosloss          | CosineEmbeddingLoss | 0     
+3 | model            | RetinaNet           | 23.2 M
+4 | bbone            | ResNet              | 11.7 M
+5 | extractor        | Sequential          | 11.2 M
+6 | teacher_model    | RecognitionModel    | 11.3 M
+7 | tm               | Sequential          | 11.2 M
+---------------------------------------------------------
+46.2 M    Trainable params
+0         Non-trainable params
+46.2 M    Total params
+184.650   Total estimated model params size (MB)
+/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/utilities/distributed.py:68: UserWarning: The dataloader, val dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 4 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+Validation sanity check: 0it [00:00, ?it/s]Validation sanity check:   0%|          | 0/2 [00:00<?, ?it/s]Validation sanity check:  50%|█████     | 1/2 [00:10<00:10, 10.14s/it]Validation sanity check: 100%|██████████| 2/2 [00:20<00:00, 10.15s/it]                                                                      /Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/utilities/distributed.py:68: UserWarning: The dataloader, train dataloader, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 4 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+Training: 0it [00:00, ?it/s]Training:   0%|          | 0/534 [00:00<?, ?it/s]Epoch 0:   0%|          | 0/534 [00:00<?, ?it/s] > /Users/emilecarron/projects/thesis/detectie/retinanet.py(145)training_step()
+-> x, y = batch
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(146)training_step()
+-> y = [{'boxes': b, 'labels': l, 'embedding': e}
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(147)training_step()
+-> for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(150)training_step()
+-> boxes = y[0]['boxes'].int()
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(151)training_step()
+-> counter = 0
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(152)training_step()
+-> for idx in boxes:
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(153)training_step()
+-> height = idx[3]-idx[1]
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(154)training_step()
+-> width = idx[2]-idx[0]
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(155)training_step()
+-> if height < 7:
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(158)training_step()
+-> if width < 7:
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(162)training_step()
+-> image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(163)training_step()
+-> self.tm.eval()
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(164)training_step()
+-> predictions = self.tm(image)
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(165)training_step()
+-> embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(batch_idx) + '_' + str(counter)+'.pt'
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(166)training_step()
+-> torch.save(predictions, embedding_path)
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(167)training_step()
+-> _, predicted = torch.max(predictions.data, 1)
+(Pdb) tensor([[[[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[5.8946e-01]],
+
+         [[0.0000e+00]],
+
+         [[5.2930e-03]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.2345e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.5006e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[8.9148e-02]],
+
+         [[1.1905e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[4.5617e-01]],
+
+         [[0.0000e+00]],
+
+         [[2.5516e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.2540e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[8.3024e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.6385e+00]],
+
+         [[0.0000e+00]],
+
+         [[4.2960e-01]],
+
+         [[1.7860e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[9.3632e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[3.4058e-04]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.2938e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[3.0626e-02]],
+
+         [[3.1610e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.8347e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.2756e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[8.9164e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[6.3259e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.5970e-01]],
+
+         [[2.8536e-01]],
+
+         [[3.2471e-01]],
+
+         [[1.4749e-02]],
+
+         [[0.0000e+00]],
+
+         [[1.0300e+00]],
+
+         [[5.2266e-02]],
+
+         [[0.0000e+00]],
+
+         [[1.0279e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[8.0724e-03]],
+
+         [[5.1817e-01]],
+
+         [[0.0000e+00]],
+
+         [[1.4891e-01]],
+
+         [[6.7479e-02]],
+
+         [[7.4549e-01]],
+
+         [[6.2145e-01]],
+
+         [[5.0781e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.5401e-01]],
+
+         [[6.0372e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.5456e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.4393e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[8.8130e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[3.0191e-01]],
+
+         [[0.0000e+00]],
+
+         [[3.6595e-02]],
+
+         [[3.2888e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[5.1034e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.1522e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.5078e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[6.5624e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.8193e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[9.3747e-01]],
+
+         [[6.5400e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.1509e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.1559e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[7.8748e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[3.8803e-01]],
+
+         [[0.0000e+00]],
+
+         [[7.8664e-01]],
+
+         [[5.3206e-01]],
+
+         [[0.0000e+00]],
+
+         [[5.5864e-01]],
+
+         [[0.0000e+00]],
+
+         [[1.2519e-01]],
+
+         [[1.8348e+00]],
+
+         [[1.2569e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[6.4895e-02]],
+
+         [[0.0000e+00]],
+
+         [[1.6938e-01]],
+
+         [[0.0000e+00]],
+
+         [[4.7890e-02]],
+
+         [[0.0000e+00]],
+
+         [[4.6290e-01]],
+
+         [[5.4661e-01]],
+
+         [[3.3057e-04]],
+
+         [[0.0000e+00]],
+
+         [[3.7788e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[8.3634e-02]],
+
+         [[0.0000e+00]],
+
+         [[1.1677e-01]],
+
+         [[4.1426e-03]],
+
+         [[9.0288e-01]],
+
+         [[0.0000e+00]],
+
+         [[2.2622e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.3033e+00]],
+
+         [[2.5693e-01]],
+
+         [[1.1557e-01]],
+
+         [[8.8261e-02]],
+
+         [[0.0000e+00]],
+
+         [[6.0311e-03]],
+
+         [[8.7742e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[9.4067e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[5.0144e-01]],
+
+         [[1.5128e-02]],
+
+         [[0.0000e+00]],
+
+         [[3.6983e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.7944e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.4070e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.0464e-02]],
+
+         [[0.0000e+00]],
+
+         [[1.4210e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[3.2473e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.5181e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.2993e+00]],
+
+         [[0.0000e+00]],
+
+         [[6.6104e-02]],
+
+         [[2.4209e-01]],
+
+         [[1.6385e-01]],
+
+         [[1.7724e+00]],
+
+         [[0.0000e+00]],
+
+         [[4.8963e-03]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.4701e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.3615e-01]],
+
+         [[0.0000e+00]],
+
+         [[5.9555e-01]],
+
+         [[0.0000e+00]],
+
+         [[5.3349e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.2571e+00]],
+
+         [[5.5883e-01]],
+
+         [[1.0289e+00]],
+
+         [[9.6270e-01]],
+
+         [[0.0000e+00]],
+
+         [[1.9297e-02]],
+
+         [[1.0990e+00]],
+
+         [[7.7497e-02]],
+
+         [[3.8476e-02]],
+
+         [[1.5651e+00]],
+
+         [[4.3982e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.1765e-01]],
+
+         [[1.0513e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.4465e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.0892e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[9.8664e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[9.1806e-01]],
+
+         [[0.0000e+00]],
+
+         [[3.0414e-02]],
+
+         [[1.8701e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[6.1927e-01]],
+
+         [[0.0000e+00]],
+
+         [[7.1276e-03]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[7.3924e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.9463e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[8.6832e-02]],
+
+         [[0.0000e+00]],
+
+         [[2.2672e-01]],
+
+         [[7.9780e-01]],
+
+         [[0.0000e+00]],
+
+         [[2.5942e-01]],
+
+         [[0.0000e+00]],
+
+         [[3.7684e-03]],
+
+         [[0.0000e+00]],
+
+         [[4.4963e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.2728e-01]],
+
+         [[0.0000e+00]],
+
+         [[4.3898e-01]],
+
+         [[0.0000e+00]],
+
+         [[1.5082e-01]],
+
+         [[1.1071e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[9.2260e-02]],
+
+         [[1.2475e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.5308e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.4855e-03]],
+
+         [[2.1546e-01]],
+
+         [[4.0575e-02]],
+
+         [[6.6826e-01]],
+
+         [[0.0000e+00]],
+
+         [[2.1057e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.5504e-02]],
+
+         [[0.0000e+00]],
+
+         [[3.1667e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[2.1465e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[3.7209e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[9.9852e-02]],
+
+         [[2.8469e-01]],
+
+         [[3.9831e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.6050e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[3.7519e-01]],
+
+         [[2.8729e-02]],
+
+         [[0.0000e+00]],
+
+         [[8.3268e-01]],
+
+         [[4.3963e-03]],
+
+         [[1.8711e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.0728e-01]],
+
+         [[1.1729e+00]],
+
+         [[6.2532e-02]],
+
+         [[7.9420e-01]],
+
+         [[0.0000e+00]],
+
+         [[1.1696e-01]],
+
+         [[3.1507e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[3.6595e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[5.9016e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[3.3010e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[4.7039e-03]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[3.8104e-02]],
+
+         [[6.1362e-01]],
+
+         [[1.4896e+00]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[1.8078e-01]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]],
+
+         [[4.5612e-02]],
+
+         [[0.0000e+00]],
+
+         [[0.0000e+00]]]], grad_fn=<MeanBackward1>)
+(Pdb) Epoch 0:   0%|          | 0/534 [02:40<?, ?it/s]
+Traceback (most recent call last):
+  File "train.py", line 78, in <module>
+    main(args)
+  File "train.py", line 59, in main
+    trainer.fit(model, dm)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 499, in fit
+    self.dispatch()
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 546, in dispatch
+    self.accelerator.start_training(self)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 73, in start_training
+    self.training_type_plugin.start_training(trainer)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 114, in start_training
+    self._results = trainer.run_train()
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 637, in run_train
+    self.train_loop.run_training_epoch()
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 492, in run_training_epoch
+    batch_output = self.run_training_batch(batch, batch_idx, dataloader_idx)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 654, in run_training_batch
+    self.optimizer_step(optimizer, opt_idx, batch_idx, train_step_and_backward_closure)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 433, in optimizer_step
+    using_lbfgs=is_lbfgs,
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/core/lightning.py", line 1390, in optimizer_step
+    optimizer.step(closure=optimizer_closure)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/core/optimizer.py", line 214, in step
+    self.__optimizer_step(*args, closure=closure, profiler_name=profiler_name, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/core/optimizer.py", line 134, in __optimizer_step
+    trainer.accelerator.optimizer_step(optimizer, self._optimizer_idx, lambda_closure=closure, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 277, in optimizer_step
+    self.run_optimizer_step(optimizer, opt_idx, lambda_closure, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 282, in run_optimizer_step
+    self.training_type_plugin.optimizer_step(optimizer, lambda_closure=lambda_closure, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 163, in optimizer_step
+    optimizer.step(closure=lambda_closure, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/torch/optim/optimizer.py", line 89, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/torch/optim/adam.py", line 66, in step
+    loss = closure()
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 649, in train_step_and_backward_closure
+    split_batch, batch_idx, opt_idx, optimizer, self.trainer.hiddens
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 742, in training_step_and_backward
+    result = self.training_step(split_batch, batch_idx, opt_idx, hiddens)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 293, in training_step
+    training_step_output = self.trainer.accelerator.training_step(args)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 156, in training_step
+    return self.training_type_plugin.training_step(*args)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 125, in training_step
+    return self.lightning_module.training_step(*args, **kwargs)
+  File "/Users/emilecarron/projects/thesis/detectie/retinanet.py", line 167, in training_step
+    tensor = torch.load(embedding_path)
+  File "/Users/emilecarron/projects/thesis/detectie/retinanet.py", line 167, in training_step
+    tensor = torch.load(embedding_path)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/bdb.py", line 51, in trace_dispatch
+    return self.dispatch_line(frame)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/bdb.py", line 70, in dispatch_line
+    if self.quitting: raise BdbQuit
+bdb.BdbQuit

@@ -1,0 +1,11 @@
+2021-05-04 10:38:25,194 INFO    MainThread:26912 [internal.py:wandb_internal():91] W&B internal server running at pid: 26912, started at: 2021-05-04 10:38:25.194534
+2021-05-04 10:38:25,196 INFO    WriterThread:26912 [datastore.py:open_for_write():77] open: /Users/emilecarron/projects/thesis/detectie/wandb/offline-run-20210504_103824-2ez6l0xa/run-2ez6l0xa.wandb
+2021-05-04 10:38:25,197 DEBUG   HandlerThread:26912 [handler.py:handle_request():101] handle_request: run_start
+2021-05-04 10:38:25,199 DEBUG   HandlerThread:26912 [meta.py:__init__():34] meta init
+2021-05-04 10:38:25,202 DEBUG   HandlerThread:26912 [meta.py:__init__():48] meta init done
+2021-05-04 10:38:25,203 DEBUG   HandlerThread:26912 [meta.py:probe():190] probe
+2021-05-04 10:38:25,207 DEBUG   HandlerThread:26912 [meta.py:_setup_git():180] setup git
+2021-05-04 10:38:25,232 DEBUG   HandlerThread:26912 [meta.py:_setup_git():187] setup git done
+2021-05-04 10:38:25,233 DEBUG   HandlerThread:26912 [meta.py:_save_pip():52] save pip
+2021-05-04 10:38:25,234 DEBUG   HandlerThread:26912 [meta.py:_save_pip():66] save pip done
+2021-05-04 10:38:25,234 DEBUG   HandlerThread:26912 [meta.py:probe():231] probe done

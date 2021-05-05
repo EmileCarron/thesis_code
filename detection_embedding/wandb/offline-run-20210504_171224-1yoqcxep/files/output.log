@@ -1,0 +1,223 @@
+GPU available: False, used: False
+TPU available: False, using: 0 TPU cores
+
+  | Name             | Type             | Params
+------------------------------------------------------
+0 | anchor_generator | AnchorGenerator  | 0     
+1 | backbone         | BackboneWithFPN  | 14.3 M
+2 | model            | RetinaNet        | 23.2 M
+3 | bbone            | ResNet           | 11.7 M
+4 | extractor        | Sequential       | 11.2 M
+5 | teacher_model    | RecognitionModel | 11.3 M
+6 | tm               | Sequential       | 11.2 M
+------------------------------------------------------
+46.2 M    Trainable params
+0         Non-trainable params
+46.2 M    Total params
+184.650   Total estimated model params size (MB)
+Validation sanity check: 0it [00:00, ?it/s]/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/utilities/distributed.py:68: UserWarning: The dataloader, val dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 4 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+Validation sanity check:   0%|          | 0/2 [00:00<?, ?it/s]/Users/emilecarron/dataset/SKU110K/images/val_169.jpg
+Validation sanity check:  50%|█████     | 1/2 [00:10<00:10, 10.11s/it]/Users/emilecarron/dataset/SKU110K/images/val_33.jpg
+Validation sanity check: 100%|██████████| 2/2 [00:20<00:00, 10.14s/it]/Users/emilecarron/dataset/SKU110K/images/val_280.jpg
+                                                                      /Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/utilities/distributed.py:68: UserWarning: The dataloader, train dataloader, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 4 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+Training: 0it [00:00, ?it/s]Training:   0%|          | 0/534 [00:00<?, ?it/s]Epoch 0:   0%|          | 0/534 [00:00<?, ?it/s] /Users/emilecarron/dataset/SKU110K/images/train_0.jpg
+/Users/emilecarron/dataset/SKU110K/images/train_1.jpg
+> /Users/emilecarron/projects/thesis/detectie/retinanet.py(194)training_step()
+-> x, y = batch
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(195)training_step()
+-> y = [{'boxes': b, 'labels': l, 'embedding': e}
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(196)training_step()
+-> for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(199)training_step()
+-> boxes = y[0]['boxes'].int()
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(200)training_step()
+-> counter = 0
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(201)training_step()
+-> for idx in boxes:
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(202)training_step()
+-> height = idx[3]-idx[1]
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(203)training_step()
+-> width = idx[2]-idx[0]
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(204)training_step()
+-> if height < 7:
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(207)training_step()
+-> if width < 7:
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(211)training_step()
+-> image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(212)training_step()
+-> self.tm.eval()
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(213)training_step()
+-> predictions = torch.squeeze(self.tm(image))
+(Pdb) tensor([[[[0.0588, 0.2941, 0.5725,  ..., 0.0706, 0.0941, 0.0824],
+          [0.2196, 0.6157, 0.6314,  ..., 0.0353, 0.0824, 0.0902],
+          [0.3686, 0.6078, 0.5843,  ..., 0.1059, 0.0157, 0.0078],
+          ...,
+          [0.9882, 0.6667, 0.3843,  ..., 0.8039, 0.7529, 0.6314],
+          [0.5843, 0.9529, 0.4314,  ..., 0.5882, 0.6235, 0.6510],
+          [0.5686, 0.9020, 0.5765,  ..., 0.7765, 0.5961, 0.6000]],
+
+         [[0.0980, 0.3294, 0.6078,  ..., 0.1255, 0.1373, 0.1255],
+          [0.2588, 0.6510, 0.6706,  ..., 0.0902, 0.1255, 0.1333],
+          [0.3922, 0.6392, 0.6157,  ..., 0.1882, 0.0941, 0.0863],
+          ...,
+          [0.9843, 0.6824, 0.4000,  ..., 0.7647, 0.7020, 0.5725],
+          [0.5843, 0.9608, 0.4431,  ..., 0.5451, 0.5725, 0.5882],
+          [0.5608, 0.8941, 0.5804,  ..., 0.7412, 0.5608, 0.5569]],
+
+         [[0.1255, 0.3686, 0.6471,  ..., 0.1529, 0.1686, 0.1569],
+          [0.2863, 0.6902, 0.7098,  ..., 0.1176, 0.1569, 0.1647],
+          [0.4471, 0.7059, 0.6824,  ..., 0.1922, 0.1137, 0.1059],
+          ...,
+          [1.0000, 0.7020, 0.4196,  ..., 0.7412, 0.6706, 0.5255],
+          [0.6078, 0.9647, 0.4510,  ..., 0.5137, 0.5333, 0.5333],
+          [0.5843, 0.8902, 0.5804,  ..., 0.7333, 0.5490, 0.5294]]]])
+(Pdb) *** NameError: name 'predictions' is not defined
+(Pdb) > /Users/emilecarron/projects/thesis/detectie/retinanet.py(214)training_step()
+-> embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(counter)+'.pt'
+(Pdb) tensor([0.0000e+00, 0.0000e+00, 5.7458e-01, 0.0000e+00, 1.0256e-02, 0.0000e+00,
+        0.0000e+00, 2.8083e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 1.5386e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 1.6920e-02, 8.1538e-02, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 4.3546e-01, 0.0000e+00, 3.8409e-01, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 1.2460e-01, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 9.0656e-02, 0.0000e+00, 0.0000e+00, 1.8352e+00, 0.0000e+00,
+        4.3494e-01, 1.9293e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 8.5882e-01, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 1.4138e-02, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 1.1897e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 2.1829e-05, 3.1829e-01, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 2.2206e-02, 0.0000e+00, 4.5487e-03, 2.1474e-01, 0.0000e+00,
+        0.0000e+00, 7.4500e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 7.9510e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 3.5718e-01, 2.0606e-01, 3.3996e-01, 3.1194e-02,
+        0.0000e+00, 9.9715e-01, 5.0311e-02, 0.0000e+00, 9.4551e-01, 0.0000e+00,
+        0.0000e+00, 1.0716e-02, 3.0176e-01, 0.0000e+00, 2.7193e-01, 1.6466e-02,
+        9.7502e-01, 9.2529e-01, 6.6409e-01, 0.0000e+00, 0.0000e+00, 2.2437e-01,
+        5.7918e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00, 2.3942e-01, 0.0000e+00,
+        0.0000e+00, 2.0037e-01, 0.0000e+00, 0.0000e+00, 1.0670e+00, 0.0000e+00,
+        0.0000e+00, 2.9784e-01, 0.0000e+00, 1.6588e-02, 5.2341e-02, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 7.0276e-02, 0.0000e+00, 4.8823e-01, 0.0000e+00,
+        0.0000e+00, 3.4048e-01, 0.0000e+00, 0.0000e+00, 8.7174e-02, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        2.3108e-02, 7.5701e-03, 0.0000e+00, 3.4696e-01, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 1.3162e+00, 7.7631e-01, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 2.3222e-01, 0.0000e+00, 0.0000e+00, 1.0660e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 8.1476e-01, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 1.8534e-01, 0.0000e+00, 7.9314e-01, 3.9523e-01,
+        0.0000e+00, 5.8105e-01, 0.0000e+00, 1.0417e-01, 1.4544e+00, 2.4958e-01,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        8.8237e-02, 0.0000e+00, 8.2052e-02, 0.0000e+00, 6.2488e-02, 0.0000e+00,
+        4.7207e-01, 4.5547e-01, 0.0000e+00, 0.0000e+00, 3.7874e-01, 0.0000e+00,
+        0.0000e+00, 6.6931e-02, 0.0000e+00, 1.3008e-01, 1.5054e-01, 9.0295e-01,
+        0.0000e+00, 2.1625e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 1.2836e-01, 1.4247e+00,
+        4.3933e-01, 1.1515e-01, 1.5170e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 6.3727e-02, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 2.3588e-02, 0.0000e+00, 0.0000e+00, 5.1349e-01, 5.7105e-04,
+        0.0000e+00, 4.2922e-01, 0.0000e+00, 0.0000e+00, 1.6672e+00, 0.0000e+00,
+        4.0801e-02, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 2.1523e-02, 0.0000e+00, 2.5895e-01, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 3.0541e+00, 0.0000e+00, 1.5569e+00, 2.4932e-02,
+        5.5413e-02, 1.4122e+00, 0.0000e+00, 1.0486e-01, 1.9388e-01, 4.5488e-01,
+        1.4769e+00, 0.0000e+00, 1.3347e-02, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 1.9162e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        1.7052e-01, 0.0000e+00, 6.8816e-01, 0.0000e+00, 5.8747e-02, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 1.3955e+00, 4.7515e-01, 7.2866e-01, 5.8017e-01,
+        0.0000e+00, 3.7913e-02, 1.2290e+00, 1.1364e-01, 4.7938e-02, 1.6045e+00,
+        5.9708e-02, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 1.2943e-01,
+        1.0463e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 2.3410e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 8.8934e-04, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 9.0734e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 9.5684e-01, 0.0000e+00, 1.5095e-02, 1.8204e-01, 0.0000e+00,
+        0.0000e+00, 5.5623e-01, 0.0000e+00, 5.9218e-02, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 6.8897e-01, 0.0000e+00, 0.0000e+00,
+        3.4634e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00, 8.6779e-02, 0.0000e+00,
+        2.1280e-01, 6.2892e-01, 0.0000e+00, 1.0114e-01, 0.0000e+00, 1.0011e-02,
+        0.0000e+00, 4.3152e+00, 0.0000e+00, 2.2777e-01, 0.0000e+00, 2.9667e-01,
+        0.0000e+00, 8.5992e-02, 1.1684e+00, 0.0000e+00, 0.0000e+00, 7.3683e-03,
+        1.4100e-01, 0.0000e+00, 0.0000e+00, 1.6129e+00, 0.0000e+00, 0.0000e+00,
+        1.9337e-01, 4.8734e-02, 6.5220e-01, 0.0000e+00, 1.8587e-02, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 3.9150e-02, 0.0000e+00, 1.6005e-02, 0.0000e+00,
+        9.6425e-03, 0.0000e+00, 0.0000e+00, 0.0000e+00, 4.3771e-02, 3.3996e-02,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 3.1315e-02, 0.0000e+00, 0.0000e+00,
+        1.2900e-01, 3.6863e-01, 2.3113e-01, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        1.5898e+00, 0.0000e+00, 0.0000e+00, 3.7396e-01, 7.5171e-02, 0.0000e+00,
+        6.5296e-01, 0.0000e+00, 4.1922e-03, 0.0000e+00, 0.0000e+00, 6.8280e-03,
+        1.3339e+00, 1.2465e-01, 7.1640e-01, 0.0000e+00, 1.0510e-01, 3.4085e-01,
+        0.0000e+00, 8.7019e-03, 0.0000e+00, 0.0000e+00, 0.0000e+00, 5.6893e-01,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 1.2760e-01, 0.0000e+00, 0.0000e+00, 3.1057e-01, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+        0.0000e+00, 1.9285e-03, 0.0000e+00, 3.5475e-02, 5.6033e-01, 1.2122e+00,
+        0.0000e+00, 0.0000e+00, 3.1342e-01, 0.0000e+00, 0.0000e+00, 3.8171e-02,
+        0.0000e+00, 0.0000e+00], grad_fn=<SqueezeBackward0>)
+(Pdb) Epoch 0:   0%|          | 0/534 [00:27<?, ?it/s]
+Traceback (most recent call last):
+  File "train.py", line 78, in <module>
+    main(args)
+  File "train.py", line 59, in main
+    trainer.fit(model, dm)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 499, in fit
+    self.dispatch()
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 546, in dispatch
+    self.accelerator.start_training(self)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 73, in start_training
+    self.training_type_plugin.start_training(trainer)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 114, in start_training
+    self._results = trainer.run_train()
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 637, in run_train
+    self.train_loop.run_training_epoch()
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 492, in run_training_epoch
+    batch_output = self.run_training_batch(batch, batch_idx, dataloader_idx)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 654, in run_training_batch
+    self.optimizer_step(optimizer, opt_idx, batch_idx, train_step_and_backward_closure)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 433, in optimizer_step
+    using_lbfgs=is_lbfgs,
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/core/lightning.py", line 1390, in optimizer_step
+    optimizer.step(closure=optimizer_closure)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/core/optimizer.py", line 214, in step
+    self.__optimizer_step(*args, closure=closure, profiler_name=profiler_name, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/core/optimizer.py", line 134, in __optimizer_step
+    trainer.accelerator.optimizer_step(optimizer, self._optimizer_idx, lambda_closure=closure, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 277, in optimizer_step
+    self.run_optimizer_step(optimizer, opt_idx, lambda_closure, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 282, in run_optimizer_step
+    self.training_type_plugin.optimizer_step(optimizer, lambda_closure=lambda_closure, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 163, in optimizer_step
+    optimizer.step(closure=lambda_closure, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/torch/optim/optimizer.py", line 89, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/torch/optim/adam.py", line 66, in step
+    loss = closure()
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 649, in train_step_and_backward_closure
+    split_batch, batch_idx, opt_idx, optimizer, self.trainer.hiddens
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 742, in training_step_and_backward
+    result = self.training_step(split_batch, batch_idx, opt_idx, hiddens)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/trainer/training_loop.py", line 293, in training_step
+    training_step_output = self.trainer.accelerator.training_step(args)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 156, in training_step
+    return self.training_type_plugin.training_step(*args)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 125, in training_step
+    return self.lightning_module.training_step(*args, **kwargs)
+  File "/Users/emilecarron/projects/thesis/detectie/retinanet.py", line 214, in training_step
+    embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(counter)+'.pt'
+  File "/Users/emilecarron/projects/thesis/detectie/retinanet.py", line 214, in training_step
+    embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(counter)+'.pt'
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/bdb.py", line 51, in trace_dispatch
+    return self.dispatch_line(frame)
+  File "/Users/emilecarron/opt/anaconda3/envs/thesis/lib/python3.6/bdb.py", line 70, in dispatch_line
+    if self.quitting: raise BdbQuit
+bdb.BdbQuit
