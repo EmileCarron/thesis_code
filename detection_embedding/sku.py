@@ -74,7 +74,7 @@ class Sku(Dataset):
             image = transformed['image']
             target['boxes'] = torch.tensor(transformed['bboxes'])
             target['labels'] = torch.tensor(transformed['class_labels'])
-            target['embedding'] = torch.tensor(target['embedding'], requires_grad=True)
+            target['embedding'] = torch.tensor(target['embedding'])
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
     
