@@ -60,7 +60,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
         self.cos = CosineSimilarity()
 
     def compute_loss(self, targets, head_outputs, matched_idxs): 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         losses = []
 
         cls_logits = head_outputs['embedding']
@@ -94,8 +94,8 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             loss = torch.div(loss, cls_logits_per_image.size()[0])
             losses.append(loss)
 
-        #return _sum(losses) / len(targets) 
-        return 1 
+        return _sum(losses) / len(targets) 
+        
 
 
 class RecognitionModel(pl.LightningModule):
