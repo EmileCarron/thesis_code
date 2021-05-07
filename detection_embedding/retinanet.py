@@ -79,7 +79,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
 
             input_tensor = cls_logits_per_image.size()[0]
             output_tensor = targets_per_image['embedding'].size()[0]
-            self.fc = nn.Linear(input_tensor, output_tensor)
+            self.fc = nn.Linear(input_tensor, output_tensor).cuda()
             cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
             cls_logits_per_image = self.fc(cls_logits_per_image.cuda())
             cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
