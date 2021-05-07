@@ -87,7 +87,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
 
             # compute the classification loss
             loss = CosineSimilarity(cls_logits_per_image, targets_per_image['embedding']) 
-            print loss
+            print(loss)
 
         #return _sum(losses) / len(targets) 
         return 1 
