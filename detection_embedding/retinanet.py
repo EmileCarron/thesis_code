@@ -220,7 +220,7 @@ class RetinaNetLightning(pl.LightningModule):
         boxes = y[0]['boxes'].int()
         counter = 0
         for idx in boxes:
-            import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
             height = idx[3]-idx[1]
             width = idx[2]-idx[0]
             if height < 7:
