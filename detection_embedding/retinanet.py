@@ -57,6 +57,7 @@ class HeadJDE(RetinaNetHead):
 class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
     def __init__(self, in_channels, num_anchors, num_classes, prior_probability=0.01):
         super().__init__(in_channels, num_anchors, num_classes, prior_probability=0.01) 
+        self.cos = CosineSimilarity()
 
     def compute_loss(self, targets, head_outputs, matched_idxs): 
         import pdb; pdb.set_trace()
@@ -86,8 +87,9 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
 
             # compute the classification loss
-            loss = CosineSimilarity()(cls_logits_per_image, targets_per_image['embedding']) 
-            print(loss)
+            loss = cos(cls_logits_per_image, targets_per_image['embedding']) 
+            loss = loss/ max(1, num_foreground)
+            losses.append(loss)
 
         #return _sum(losses) / len(targets) 
         return 1 
