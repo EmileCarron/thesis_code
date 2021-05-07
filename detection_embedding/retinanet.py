@@ -199,56 +199,57 @@ class RetinaNetLightning(pl.LightningModule):
         return backbone
         
     def training_step(self, batch, batch_idx):
-        with torch.no_grad():
+        #with torch.no_grad():
+        #import pdb; pdb.set_trace()
+        x, y = batch
+        y = [{'boxes': b, 'labels': l, 'embedding': e}
+        for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
+        ]
+        
+        boxes = y[0]['boxes'].int()
+        counter = 0
+        for idx in boxes:
             #import pdb; pdb.set_trace()
-            x, y = batch
-            y = [{'boxes': b, 'labels': l, 'embedding': e}
-            for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
-            ]
-            
-            boxes = y[0]['boxes'].int()
-            counter = 0
-            for idx in boxes:
+            height = idx[3]-idx[1]
+            width = idx[2]-idx[0]
+            if height < 7:
                 #import pdb; pdb.set_trace()
-                height = idx[3]-idx[1]
-                width = idx[2]-idx[0]
-                if height < 7:
-                    #import pdb; pdb.set_trace()
-                    height = 7
-                if width < 7:
-                    #import pdb; pdb.set_trace()
-                    width = 7
+                height = 7
+            if width < 7:
+                #import pdb; pdb.set_trace()
+                width = 7
 
-                image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
-                self.tm_full.eval()
-                self.tm_extractor.eval()
-                predictions = self.tm_full(image)
-                predictions_embedding = self.tm_extractor(image)
-                #embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(counter)+'.pt'
-                #torch.save(predictions, embedding_path)
-                _, predicted = torch.max(predictions.data, 1)
-                predictions_embedding = torch.squeeze(predictions_embedding)
-                y[0]['labels'][counter] = predicted 
-                
-                    #test = torch.no_grad(predictions)
-                y[0]['embedding'][counter] = predictions_embedding
-                counter = counter + 1
-                
-                
-
-
-                #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
-                #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
-
+            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
+            self.tm_full.eval()
+            self.tm_extractor.eval()
+            predictions = self.tm_full(image)
+            predictions_embedding = self.tm_extractor(image)
+            #embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(counter)+'.pt'
+            #torch.save(predictions, embedding_path)
+            _, predicted = torch.max(predictions.data, 1)
+            predictions_embedding = torch.squeeze(predictions_embedding)
+            predictions_embedding = predicitions_embedding.clone().detach().numpy()
+            y[0]['labels'][counter] = predicted 
+            
+                #test = torch.no_grad(predictions)
+            y[0]['embedding'][counter] = predictions_embedding
+            counter = counter + 1
             
             
 
-            losses = self.model(x,y)
-            tot = losses['classification'] + losses['bbox_regression']
-            self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
-            self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
-            self.log("loss_training", tot, on_step=True, on_epoch=True)
-            return losses['classification'] + losses['bbox_regression']
+
+            #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
+            #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
+
+        
+        
+
+        losses = self.model(x,y)
+        tot = losses['classification'] + losses['bbox_regression']
+        self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
+        self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
+        self.log("loss_training", tot, on_step=True, on_epoch=True)
+        return losses['classification'] + losses['bbox_regression']
         
     # def validation_step(self, batch, batch_idx):
     #     #import pdb; pdb.set_trace()
