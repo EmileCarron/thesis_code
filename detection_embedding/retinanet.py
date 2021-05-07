@@ -239,7 +239,7 @@ class RetinaNetLightning(pl.LightningModule):
             #torch.save(predictions, embedding_path)
             _, predicted = torch.max(predictions.data, 1)
             predictions_embedding = torch.squeeze(predictions_embedding)
-            predictions_embedding = predictions_embedding.clone().detach().tensor()
+            predictions_embedding = predictions_embedding.clone().detach()
             predictions_embedding = torch.Tensor(predictions_embedding)
             y[0]['labels'][counter] = predicted 
             
