@@ -58,7 +58,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
         super().__init__(in_channels, num_anchors, num_classes, prior_probability=0.01) 
 
     def compute_loss(self, targets, head_outputs, matched_idxs): 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         losses = []
 
         cls_logits = head_outputs['embedding']
