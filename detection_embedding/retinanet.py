@@ -87,7 +87,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
 
             # compute the classification loss
-            loss = cos(cls_logits_per_image, targets_per_image['embedding']) 
+            loss = self.cos(cls_logits_per_image, targets_per_image['embedding']) 
             loss = loss/ max(1, num_foreground)
             losses.append(loss)
 
