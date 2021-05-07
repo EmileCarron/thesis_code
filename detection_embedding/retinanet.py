@@ -243,7 +243,7 @@ class RetinaNetLightning(pl.LightningModule):
 
         
         
-
+        import pdb; pdb.set_trace()
         losses = self.model(x,y)
         tot = losses['classification'] + losses['bbox_regression']
         self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
