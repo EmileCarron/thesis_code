@@ -11,8 +11,8 @@ import sku
 from sku import Sku
 from retinanet import RetinaNetLightning
 import sys
-#import wandb
-#from pytorch_lightning.loggers import WandbLogger
+import wandb
+from pytorch_lightning.loggers import WandbLogger
 from argparse import ArgumentParser
 import albumentations as A
 
@@ -48,14 +48,14 @@ class RetinaNetDataModule(pl.LightningDataModule):
 
 def main(args):
 
-    #wandb_logger = WandbLogger()
-    #wandb.init(project='thesis', entity='mille')
+    wandb_logger = WandbLogger()
+    wandb.init(project='thesis', entity='mille')
 
     model = RetinaNetLightning(args)
     dm = RetinaNetDataModule()
 
-    trainer = pl.Trainer.from_argparse_args(args,  gpus=0 if torch.cuda.is_available() else 0)
-    #trainer = pl.Trainer.from_argparse_args(args, logger=wandb_logger, gpus=1 if torch.cuda.is_available() else 0)
+    #trainer = pl.Trainer.from_argparse_args(args,  gpus=0 if torch.cuda.is_available() else 0)
+    trainer = pl.Trainer.from_argparse_args(args, logger=wandb_logger, gpus=1 if torch.cuda.is_available() else 0)
     #trainer = pl.Trainer(max_epochs=1, logger=wandb_logger)
     trainer.fit(model, dm)
     
