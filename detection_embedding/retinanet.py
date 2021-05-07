@@ -77,7 +77,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             # ] = 1.0
 
          
-            cls_logits_per_image = nn.Conv2d(in_channels, cls_logits_per_image.size()[0], kernel_size=3, stride=1, padding=1)
+            cls_logits_per_image = nn.Conv2d(cls_logits_per_image.size()[0], targets_per_image.size()[0], kernel_size=3, stride=1, padding=1)
             
 
             # find indices for which anchors should be ignored
