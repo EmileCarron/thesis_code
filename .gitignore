@@ -1,2 +1,4 @@
 .DS_Store
+detection_embedding/wandb
+detection_embedding/__pycache__
 
