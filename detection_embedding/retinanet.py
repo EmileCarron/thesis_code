@@ -229,6 +229,7 @@ class RetinaNetLightning(pl.LightningModule):
             _, predicted = torch.max(predictions.data, 1)
             predictions_embedding = torch.squeeze(predictions_embedding)
             predictions_embedding = predictions_embedding.clone().detach().numpy()
+            predictions_embedding = torch.Tensor(predictions_embedding)
             y[0]['labels'][counter] = predicted 
             
                 #test = torch.no_grad(predictions)
