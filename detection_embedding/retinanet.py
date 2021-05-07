@@ -78,6 +78,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
 
          
             self.fc = nn.Linear(cls_logits_per_image.size()[0], targets_per_image['embedding'].size()[0])
+            cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
             cls_logits_per_image = self.fc(cls_logits_per_image)
 
             # find indices for which anchors should be ignored
