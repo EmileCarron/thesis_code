@@ -91,6 +91,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             loss = torch.add(loss, 1)
             loss = torch.div(loss, 2)
             loss = torch.sum(loss)
+            loss = torch.div(loss, cls_logits_per_image.size()[0])
             losses.append(loss)
 
         #return _sum(losses) / len(targets) 
