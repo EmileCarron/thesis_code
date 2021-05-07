@@ -200,7 +200,7 @@ class RetinaNetLightning(pl.LightningModule):
         
     def training_step(self, batch, batch_idx):
         #with torch.no_grad():
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         x, y = batch
         y = [{'boxes': b, 'labels': l, 'embedding': e}
         for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
