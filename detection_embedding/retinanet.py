@@ -257,11 +257,11 @@ class RetinaNetLightning(pl.LightningModule):
         
         #import pdb; pdb.set_trace()
         losses = self.model(x,y)
-        tot = losses['classification'] + losses['bbox_regression']
+        tot = losses['classification'] + losses['bbox_regression'] + losses['embedding']
         self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
         self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
         self.log("loss_training", tot, on_step=True, on_epoch=True)
-        return losses['classification'] + losses['bbox_regression']
+        return losses['classification'] + losses['bbox_regression'] + losses['embedding']
         
     # def validation_step(self, batch, batch_idx):
     #     #import pdb; pdb.set_trace()
