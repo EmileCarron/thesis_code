@@ -60,7 +60,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
         self.cos = CosineSimilarity()
 
     def compute_loss(self, targets, head_outputs, matched_idxs): 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         losses = []
 
         cls_logits = head_outputs['embedding']
