@@ -76,12 +76,16 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             #     targets_per_image['embedding'][matched_idxs_per_image[foreground_idxs_per_image]]
             # ] = 1.0
 
+         
+            cls_logits_per_image = nn.Conv2d(in_channels, cls_logits_per_image.size()[0], kernel_size=3, stride=1, padding=1)
+            
+
             # find indices for which anchors should be ignored
             valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
 
             # compute the classification loss
-            loss = (CosineEmbeddingLoss((cls_logits_per_image,
-                targets_per_image['embedding']), ))
+            loss = (CosineSimilarity((cls_logits_per_image,
+                targets_per_image['embedding']) ))
 
         #return _sum(losses) / len(targets) 
         return 1 
