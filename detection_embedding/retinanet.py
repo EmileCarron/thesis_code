@@ -86,8 +86,8 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
 
             # compute the classification loss
-            loss = CosineSimilarity(cls_logits_per_image,
-                targets_per_image['embedding']) 
+            loss = CosineSimilarity(cls_logits_per_image, targets_per_image['embedding']) 
+            print loss
 
         #return _sum(losses) / len(targets) 
         return 1 
