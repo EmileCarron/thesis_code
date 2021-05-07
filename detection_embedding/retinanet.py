@@ -21,6 +21,7 @@ from torchvision.models.detection.retinanet import RetinaNetHead
 from torchvision.models.detection.retinanet import RetinaNetClassificationHead
 from torchvision.models.detection.retinanet import RetinaNetRegressionHead
 from torch.nn import CosineEmbeddingLoss
+from torch.nn import CosineSimilarity
 import wandb
 from collections import OrderedDict
 #import tensorflow as tf
@@ -58,7 +59,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
         super().__init__(in_channels, num_anchors, num_classes, prior_probability=0.01) 
 
     def compute_loss(self, targets, head_outputs, matched_idxs): 
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         losses = []
 
         cls_logits = head_outputs['embedding']
@@ -79,8 +80,8 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
 
             # compute the classification loss
-            #loss = (CosineEmbeddingLoss((cls_logits_per_image,
-             #   targets_per_image['embedding']), ))
+            loss = (CosineEmbeddingLoss((cls_logits_per_image,
+                targets_per_image['embedding']), ))
 
         #return _sum(losses) / len(targets) 
         return 1 
