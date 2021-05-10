@@ -32,11 +32,12 @@ model_urls = {
 }
 
 class HeadJDE(RetinaNetHead):
-    def __init__(self, in_channels, num_anchors, num_classes):
+    def __init__(self, in_channels, num_anchors, num_classes, args):
         super().__init__(in_channels, num_anchors, num_classes)
+        self.args = args
         self.classification_head = RetinaNetClassificationHead(in_channels, num_anchors, num_classes)
         self.regression_head = RetinaNetRegressionHead(in_channels, num_anchors)
-        self.embedding_head = RetinaNetEmbeddingHead(in_channels, num_anchors, 512)
+        self.embedding_head = RetinaNetEmbeddingHead(in_channels, num_anchors, 512, self.args)
 
     def compute_loss(self, targets, head_outputs, anchors, matched_idxs):
         # type: (List[Dict[str, Tensor]], Dict[str, Tensor], List[Tensor], List[Tensor]) -> Dict[str, Tensor]
@@ -55,8 +56,9 @@ class HeadJDE(RetinaNetHead):
         }
 
 class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
-    def __init__(self, in_channels, num_anchors, num_classes, prior_probability=0.01):
+    def __init__(self, in_channels, num_anchors, num_classes, args, prior_probability=0.01):
         super().__init__(in_channels, num_anchors, num_classes, prior_probability=0.01) 
+        self.args = args
         self.cos = CosineSimilarity()
 
     def compute_loss(self, targets, head_outputs, matched_idxs): 
@@ -79,11 +81,14 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
 
             input_tensor = cls_logits_per_image.size()[0]
             output_tensor = targets_per_image['embedding'].size()[0]
-            self.fc = nn.Linear(input_tensor, output_tensor).cuda()
-            #self.fc = nn.Linear(input_tensor, output_tensor)
-            cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
-            cls_logits_per_image = self.fc(cls_logits_per_image.cuda())
-            #cls_logits_per_image = self.fc(cls_logits_per_image)
+            if self.args.gpu == 'yes':
+                self.fc = nn.Linear(input_tensor, output_tensor).cuda()
+                cls_logits_per_image = self.fc(cls_logits_per_image.cuda())
+            else:
+                self.fc = nn.Linear(input_tensor, output_tensor)
+                cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
+
+            cls_logits_per_image = self.fc(cls_logits_per_image)
             cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
 
             # find indices for which anchors should be ignored
@@ -160,6 +165,9 @@ class RecognitionModel(pl.LightningModule):
         else:
             raise ValueError(f'Unsupported loss: {self.args.loss}')
 
+    def get_classifier(self):
+        return self.classifier
+
     def get_model(self):
         return self.model
 
@@ -169,6 +177,7 @@ class RecognitionModel(pl.LightningModule):
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
         super().__init__()
+        self.args = args
         anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
         aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
         anchor_generator = AnchorGenerator(
@@ -176,7 +185,7 @@ class RetinaNetLightning(pl.LightningModule):
             )
         self.anchor_generator = anchor_generator
         self.backbone = self.backbone1(False)
-        self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 195)
+        self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 195, self.args)
 
         #self.backbone.fc = nn.Linear(512, 2, True)
         self.model = models.detection.RetinaNet(self.backbone, num_classes = 195, head= self.head)
@@ -187,7 +196,7 @@ class RetinaNetLightning(pl.LightningModule):
         # overwrite_eps(self.model, 0.0)
         
 
-        self.args = args
+        
         self.save_hyperparameters()
         self.teacher_model = self.teacher(args)
         self.tm_full = self.teacher_model.get_model()
@@ -214,7 +223,7 @@ class RetinaNetLightning(pl.LightningModule):
         return backbone
         
     def training_step(self, batch, batch_idx):
-        #with torch.no_grad():
+        #import pdb; pdb.set_trace()
         x, y = batch
         y = [{'boxes': b, 'labels': l, 'embedding': e}
         for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
@@ -233,8 +242,9 @@ class RetinaNetLightning(pl.LightningModule):
             image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
             self.tm_full.eval()
             self.tm_extractor.eval()
-            predictions = self.tm_full(image)
+            #predictions = self.tm_full(image)
             predictions_embedding = self.tm_extractor(image)
+            predictions = self.tm_full(image)
             _, predicted = torch.max(predictions.data, 1)
             predictions_embedding = torch.squeeze(predictions_embedding)
             predictions_embedding = predictions_embedding.clone().detach()
@@ -272,8 +282,9 @@ class RetinaNetLightning(pl.LightningModule):
             image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
             self.tm_full.eval()
             self.tm_extractor.eval()
-            predictions = self.tm_full(image)
+            #predictions = self.tm_full(image)
             predictions_embedding = self.tm_extractor(image)
+            predictions = self.tm_full(image)
             _, predicted = torch.max(predictions.data, 1)
             predictions_embedding = torch.squeeze(predictions_embedding)
             predictions_embedding = predictions_embedding.clone().detach()
