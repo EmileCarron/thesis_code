@@ -83,12 +83,14 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             output_tensor = targets_per_image['embedding'].size()[0]
             if self.args.gpu == 'yes':
                 self.fc = nn.Linear(input_tensor, output_tensor).cuda()
+                cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
                 cls_logits_per_image = self.fc(cls_logits_per_image.cuda())
             else:
                 self.fc = nn.Linear(input_tensor, output_tensor)
                 cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
+                cls_logits_per_image = self.fc(cls_logits_per_image)
 
-            cls_logits_per_image = self.fc(cls_logits_per_image)
+            #cls_logits_per_image = self.fc(cls_logits_per_image)
             cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
 
             # find indices for which anchors should be ignored
