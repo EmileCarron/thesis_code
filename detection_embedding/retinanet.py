@@ -297,6 +297,15 @@ class RetinaNetLightning(pl.LightningModule):
         return detections
        
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr = self.args.lr,
-                                    weight_decay = self.args.weight_decay)
+        if self.args.optim == 'Adam':
+            optimizer = Adam(self.parameters(), lr=self.args.lr,
+                             weight_decay=self.args.weight_decay)
+                             
+        #Stochastic Gradient Descent is usefull when you have a lot of redundancy in your data
+        elif self.args.optim == 'SGD':
+            optimizer = SGD(self.parameters(), 
+                            lr=self.args.lr,
+                            weight_decay=self.args.weight_decay,
+                            momentum=self.args.momentum)
+                            
         return optimizer
