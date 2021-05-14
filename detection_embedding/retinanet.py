@@ -263,7 +263,6 @@ class RetinaNetLightning(pl.LightningModule):
         return (losses['classification'] + losses['bbox_regression'] + losses['embedding'])/3
         
     def validation_step(self, batch, batch_idx):
-        import pdb; pdb.set_trace()
         x, y = batch
         y = [{'boxes': b, 'labels': l, 'embedding': e}
         for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
@@ -294,7 +293,7 @@ class RetinaNetLightning(pl.LightningModule):
             y[0]['embedding'][counter] = predictions_embedding
                 
             counter = counter + 1
-
+        import pdb; pdb.set_trace()
         detections = self.model(x,y)
         return detections
        
