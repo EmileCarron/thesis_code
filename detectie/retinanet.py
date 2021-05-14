@@ -167,67 +167,57 @@ class RetinaNetLightning(pl.LightningModule):
             image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
             self.tm.eval()
             predictions = self.tm(image)
-            #embedding_path = self.data_dir + '/SKU110K/annotations/embeddings/embedding' + str(counter)+'.pt'
-            #torch.save(predictions, embedding_path)
             _, predicted = torch.max(predictions.data, 1)
-            predictions = torch.squeeze(predictions)
             y[0]['labels'][counter] = predicted 
-            
-                #test = torch.no_grad(predictions)
-            #y[0]['embedding'][counter] = predictions
-            counter = counter + 1
-            
-            
-
-
-            #self.logger.experiment.log({"input image":[wandb.Image(x, caption="val_input_image")]})
-            #self.logger.experiment.log({"bbx image":[wandb.Image(image, caption="val_input_image")]})
-
-        
+            counter = counter + 1     
         
         losses = self.model(x,y)
         tot = losses['classification'] + losses['bbox_regression']
-        self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
-        self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
+        self.log("loss_training_class", losses['classification'], on_step=False, on_epoch=True)
+        self.log("loss_training_bb", losses['bbox_regression'], on_step=False, on_epoch=True)
         self.log("loss_training", tot, on_step=True, on_epoch=True)
         return losses['classification'] + losses['bbox_regression']
         
-    # def validation_step(self, batch, batch_idx):
-    #     #import pdb; pdb.set_trace()
-    #     x, y = batch
-    #     y = [{'boxes': b, 'labels': l, 'embedding': e}
-    #     for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
-    #     ]
+    def validation_step(self, batch, batch_idx):
+        #import pdb; pdb.set_trace()
+        x, y = batch
+        y = [{'boxes': b, 'labels': l}
+        for b, l in zip(y['boxes'],y['labels'])
+        ]
 
-    #     boxes = y[0]['boxes'].int()
-    #     counter = 0
-    #     for idx in boxes:
-    #         height = idx[3]-idx[1]
-    #         width = idx[2]-idx[0]
-    #         if height < 7:
-    #             #import pdb; pdb.set_trace()
-    #             height = 7
-    #         if width < 7:
-    #             #import pdb; pdb.set_trace()
-    #             width = 7
+        boxes = y[0]['boxes'].int()
+        counter = 0
+        for idx in boxes:
+            height = idx[3]-idx[1]
+            width = idx[2]-idx[0]
+            if height < 7:
+                #import pdb; pdb.set_trace()
+                height = 7
+            if width < 7:
+                #import pdb; pdb.set_trace()
+                width = 7
 
-    #         image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
-    #         self.tm.eval()
-    #         predictions = self.tm(image)
-    #         _, predicted = torch.max(predictions.data, 1)
-    #         y[0]['labels'][counter] = predicted 
-    #         y[0]['embedding'][counter] = predictions
+            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
+            self.tm.eval()
+            predictions = self.tm(image)
+            _, predicted = torch.max(predictions.data, 1)
+            y[0]['labels'][counter] = predicted 
                 
-    #         counter = counter + 1
+            counter = counter + 1
 
-    #     detections = self.model(x,y)
-    #     #if detections[0]['scores'].size() != torch.Size([0]):
-    #         #self.log("valid_score", detections[0]['scores'][0], on_step=True, on_epoch=True)
-
-    #     #self.log("valid_score", detections[0]['scores'][0], on_step=True, on_epoch=True)
-    #     return detections
+        detections = self.model(x,y)
+        return detections
        
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr = self.args.lr,
-                                    weight_decay = self.args.weight_decay)
+        if self.args.optim == 'Adam':
+            optimizer = Adam(self.parameters(), lr=self.args.lr,
+                             weight_decay=self.args.weight_decay)
+                             
+        #Stochastic Gradient Descent is usefull when you have a lot of redundancy in your data
+        elif self.args.optim == 'SGD':
+            optimizer = SGD(self.parameters(), 
+                            lr=self.args.lr,
+                            weight_decay=self.args.weight_decay,
+                            momentum=self.args.momentum)
+                            
         return optimizer
