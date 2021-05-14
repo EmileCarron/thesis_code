@@ -73,6 +73,7 @@ if __name__ == '__main__':
                             choices=['CrossEntropy', 'ArcFace',
                                      'TripletMargin', 'ContrastiveLoss',
                                      'CircleLoss', 'LargeMarginSoftmaxLoss'])
+    parser.add_argument('--optim', type=str, default='SGD')
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
     main(args)
