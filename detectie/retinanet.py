@@ -206,7 +206,7 @@ class RetinaNetLightning(pl.LightningModule):
 
         #import pdb; pdb.set_trace()
         detections = self.model(x,y)
-        print(detections)
+        #print(detections)
         return detections
        
     def configure_optimizers(self):
