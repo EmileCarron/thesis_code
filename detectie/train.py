@@ -37,7 +37,7 @@ class RetinaNetDataModule(pl.LightningDataModule):
             self.val_set = Sku(csv_file = self.data_dir + '/annotations/annotations_val.csv', root_dir = self.data_dir + '/images', transform = A.Compose([
                             A.RandomSizedBBoxSafeCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
-            self.val_set, test_set = torch.utils.data.random_split(self.val_set, [500, len(self.val_set)-500], generator=torch.Generator().manual_seed(42))
+            self.val_set, test_set = torch.utils.data.random_split(self.val_set, [10, len(self.val_set)-10], generator=torch.Generator().manual_seed(42))
         
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = args.num_workers)
