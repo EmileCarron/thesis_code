@@ -204,7 +204,7 @@ class RetinaNetLightning(pl.LightningModule):
             y[0]['labels'][counter] = predicted 
             counter = counter + 1
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         detections = self.model(x,y)
         print(detections)
         return detections
