@@ -291,8 +291,8 @@ class RetinaNetLightning(pl.LightningModule):
             predictions_embedding = predictions_embedding.clone().detach()
             y[0]['labels'][counter] = predicted 
             y[0]['embedding'][counter] = predictions_embedding
-                
             counter = counter + 1
+            
         import pdb; pdb.set_trace()
         detections = self.model(x,y)
         return detections
