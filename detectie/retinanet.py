@@ -29,147 +29,40 @@ model_urls = {
     'retinanet_resnet50_fpn_coco':
         'https://download.pytorch.org/models/retinanet_resnet50_fpn_coco-eeacb38b.pth',
 }
-
-class RecognitionModel(pl.LightningModule):
-
-    def __init__(self,args):
-        super().__init__()
-        #ckpt = '../../../Masterproef/thesis_code/recognition/wandb/run-20210409_112741-28fdpx5s/files/thesis/28fdpx5s/checkpoints/epoch=299-step=18899.ckpt' 
-        
-        self.model = torchvision.models.resnet18(pretrained=True)
-        self.model.fc = nn.Linear(512, 195, True)
-        self.args = args
-
-
-        self.extractor = torch.nn.Sequential(
-            OrderedDict(
-                list(self.model.named_children())[:-1]
-            ),
-         
-        )
-
-        self.classifier = torch.nn.Sequential(
-            OrderedDict(
-                list(self.model.named_children())[-1:]
-            )
-        )
-
-        if self.args.loss == 'CrossEntropy':
-            self.loss = torch.nn.CrossEntropyLoss()
-            self.loss_requires_classifier = True
-            
-        elif self.args.loss == 'ArcFace':
-            self.loss = losses.ArcFaceLoss(
-            margin=0.5,
-            embedding_size=self.classifier.fc.in_features,
-            num_classes=self.classifier.fc.out_features
-            )
-            self.loss_requires_classifier = False
-            
-        elif self.args.loss == 'ContrastiveLoss':
-            self.loss = losses.ContrastiveLoss(
-            pos_margin=0,
-            neg_margin=1
-            )
-            self.loss_requires_classifier = False
-        
-        #sampler toevoegen!!!! 
-        elif self.args.loss == 'TripletMargin':
-            self.loss = losses.TripletMarginLoss(
-            margin=0.1
-            )
-            self.loss_requires_classifier = False
- 
-        elif self.args.loss == 'CircleLoss':
-            self.loss = losses.CircleLoss(m=0.4,
-            gamma=80
-            )
-            self.loss_requires_classifier = False
-            
-        else:
-            raise ValueError(f'Unsupported loss: {self.args.loss}')
-
-    def get_model(self):
-        return self.model
             
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
-        super().__init__()
-        self.anchor_generator = AnchorGenerator(
-                sizes=((32, 64, 128, 256, 512),),
-                aspect_ratios=((0.5, 1.0, 2.0),)
-        )
-        self.backbone = self.backbone1(False)
-
+        super().__init__()p 
         #self.backbone.fc = nn.Linear(512, 2, True)
-        self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
-        #self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
+        #self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
+        self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
         # state_dict = load_state_dict_from_url(model_urls['retinanet_resnet50_fpn_coco'],
         #                                       progress=True)
         # self.model.load_state_dict(state_dict)
         # overwrite_eps(self.model, 0.0)
-        self.bbone = torchvision.models.resnet18(pretrained=True)
+        #self.bbone = torchvision.models.resnet18(pretrained=True)
 
-        self.extractor = torch.nn.Sequential(
-            OrderedDict(
-                list(self.bbone.named_children())[:-1]
-            ),
+        #self.extractor = torch.nn.Sequential(
+        #    OrderedDict(
+        #        list(self.bbone.named_children())[:-1]
+        #    ),
          
-        )
+        #)
         #self.extractor.fc = nn.Linear(512, 195, True)
 
         self.args = args
         self.save_hyperparameters()
-        self.teacher_model = self.teacher(args)
-        self.tm = self.teacher_model.get_model()
+        #self.teacher_model = self.teacher(args)
+        #self.tm = self.teacher_model.get_model()
         self.data_dir = args.data_dir
         #self.teacher_model.train(False)
-
-    def teacher(self, args):
-        teacher = RecognitionModel(args)
-        teacher_model = teacher.load_from_checkpoint(checkpoint_path=args.checkpoint, args=args)
-        return teacher_model
-
-
-    def backbone1(self, pretrained_backbone, pretrained=False, trainable_backbone_layers=None):
-        trainable_backbone_layers = _validate_trainable_layers(
-        pretrained or pretrained_backbone, trainable_backbone_layers, 5, 3)
-
-        if pretrained:
-            # no need to download the backbone if pretrained is set
-            pretrained_backbone = False
-        # skip P2 because it generates too many anchors (according to their paper)
-        backbone = resnet_fpn_backbone('resnet18', pretrained_backbone, returned_layers=[2, 3, 4],
-                                       extra_blocks=LastLevelP6P7(256, 256), trainable_layers=trainable_backbone_layers)
-        return backbone
         
     def training_step(self, batch, batch_idx):
-        
         #import pdb; pdb.set_trace()
         x, y = batch
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])
-        ]
-        
-        boxes = y[0]['boxes'].int()
-        counter = 0
-        for idx in boxes:
-            #import pdb; pdb.set_trace()
-            height = idx[3]-idx[1]
-            width = idx[2]-idx[0]
-            if height < 7:
-                #import pdb; pdb.set_trace()
-                height = 7
-            if width < 7:
-                #import pdb; pdb.set_trace()
-                width = 7
-
-            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
-            self.tm.eval()
-            predictions = self.tm(image)
-            _, predicted = torch.max(predictions.data, 1)
-            y[0]['labels'][counter] = predicted 
-            counter = counter + 1     
+        ]     
         
         losses = self.model(x,y)
         tot = losses['classification'] + losses['bbox_regression']
@@ -185,26 +78,8 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
 
-        boxes = y[0]['boxes'].int()
-        counter = 0
-        for idx in boxes:
-            height = idx[3]-idx[1]
-            width = idx[2]-idx[0]
-            if height < 7:
-                #import pdb; pdb.set_trace()
-                height = 7
-            if width < 7:
-                #import pdb; pdb.set_trace()
-                width = 7
 
-            image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
-            self.tm.eval()
-            predictions = self.tm(image)
-            _, predicted = torch.max(predictions.data, 1)
-            y[0]['labels'][counter] = predicted 
-            counter = counter + 1
-
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         detections = self.model(x,y)
         #print(detections)
         return detections
