@@ -32,7 +32,7 @@ model_urls = {
             
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
-        super().__init__()p 
+        super().__init__()
         #self.backbone.fc = nn.Linear(512, 2, True)
         #self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
         self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
