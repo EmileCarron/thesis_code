@@ -87,8 +87,8 @@ class RetinaNetLightning(pl.LightningModule):
         
         losses = self.model(x,y)
         tot = losses['classification'] + losses['bbox_regression']
-        self.log("loss_training_class", losses['classification'], on_step=False, on_epoch=True)
-        self.log("loss_training_bb", losses['bbox_regression'], on_step=False, on_epoch=True)
+        self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
+        self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
         self.log("loss_training", tot, on_step=True, on_epoch=True)
         return losses['classification'] + losses['bbox_regression']
         

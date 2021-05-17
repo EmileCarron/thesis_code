@@ -26,18 +26,18 @@ class RetinaNetDataModule(pl.LightningDataModule):
         
     def setup(self, stage=None):
         if stage == 'fit' or stage is None:
-            self.train_set = Sku(csv_file = self.data_dir + '/annotations/annotations_train_embedding.csv', root_dir = self.data_dir +'/images', transform = A.Compose([
+            self.train_set = Sku(csv_file = self.data_dir + '/annotations/annotations_train.csv', root_dir = self.data_dir +'/images', transform = A.Compose([
                             A.HorizontalFlip(p=0.5),
                             A.ShiftScaleRotate(p=0.5),
                             A.RandomBrightnessContrast(p=0.2),
                             A.RGBShift(p=0.2),
                             A.RandomSizedBBoxSafeCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
-            #self.train_set, test_set = torch.utils.data.random_split(self.train_set, [5000, len(self.train_set)-5000], generator=torch.Generator().manual_seed(42))
+            self.train_set, test_set = torch.utils.data.random_split(self.train_set, [5000, len(self.train_set)-5000], generator=torch.Generator().manual_seed(42))
             self.val_set = Sku(csv_file = self.data_dir + '/annotations/annotations_val.csv', root_dir = self.data_dir + '/images', transform = A.Compose([
                             A.RandomSizedBBoxSafeCrop(width=1333, height=800),
                             ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels'])))
-            self.val_set, test_set = torch.utils.data.random_split(self.val_set, [50, len(self.val_set)-50], generator=torch.Generator().manual_seed(42))
+            self.val_set, test_set = torch.utils.data.random_split(self.val_set, [500, len(self.val_set)-500], generator=torch.Generator().manual_seed(42))
         
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = args.num_workers)
@@ -54,7 +54,7 @@ def main(args):
     model = RetinaNetLightning(args)
     dm = RetinaNetDataModule()
     
-    trainer = pl.Trainer.from_argparse_args(args, logger=wandb_logger, gpus=0 if torch.cuda.is_available() else 0)
+    trainer = pl.Trainer.from_argparse_args(args, logger=wandb_logger, gpus=1 if torch.cuda.is_available() else 0)
     #trainer = pl.Trainer(max_epochs=1, logger=wandb_logger)
     trainer.fit(model, dm)
     
