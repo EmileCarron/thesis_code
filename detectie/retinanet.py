@@ -80,7 +80,7 @@ class RetinaNetLightning(pl.LightningModule):
         ]
 
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         detections = self.model(x,y)
         #print(detections)
         return detections
