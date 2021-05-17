@@ -36,7 +36,7 @@ class RetinaNetLightning(pl.LightningModule):
         super().__init__()
         #self.backbone.fc = nn.Linear(512, 2, True)
         #self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
-        self.model = models.detection.retinanet_resnet50_fpn(pretrained=False)
+        #self.model = models.detection.retinanet_resnet50_fpn(pretrained=False)
         # state_dict = load_state_dict_from_url(model_urls['retinanet_resnet50_fpn_coco'],
         #                                       progress=True)
         # self.model.load_state_dict(state_dict)
@@ -51,12 +51,32 @@ class RetinaNetLightning(pl.LightningModule):
         #)
         #self.extractor.fc = nn.Linear(512, 195, True)
 
+        anchor_generator = AnchorGenerator(
+        sizes=((32, 64, 128, 256, 512),),
+        aspect_ratios=((0.5, 1.0, 2.0),)
+        )
+        self.backbone = self.backbone1(False)
+        # put the pieces together inside a RetinaNet model
+        model = models.detection.RetinaNet(self.backbone, num_classes=2,  anchor_generator=anchor_generator)
+
         self.args = args
         self.save_hyperparameters()
         #self.teacher_model = self.teacher(args)
         #self.tm = self.teacher_model.get_model()
         self.data_dir = args.data_dir
         #self.teacher_model.train(False)
+
+    def backbone1(self, pretrained_backbone, pretrained=False, trainable_backbone_layers=None):
+        trainable_backbone_layers = _validate_trainable_layers(
+        pretrained or pretrained_backbone, trainable_backbone_layers, 5, 3)
+
+        if pretrained:
+            # no need to download the backbone if pretrained is set
+            pretrained_backbone = False
+        # skip P2 because it generates too many anchors (according to their paper)
+        backbone = resnet_fpn_backbone('resnet18', pretrained_backbone, returned_layers=[2, 3, 4],
+                                       extra_blocks=LastLevelP6P7(256, 256), trainable_layers=trainable_backbone_layers)
+        return backbone
         
     def training_step(self, batch, batch_idx):
         #import pdb; pdb.set_trace()
@@ -80,7 +100,7 @@ class RetinaNetLightning(pl.LightningModule):
         ]
 
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         detections = self.model(x,y)
         #print(detections)
         return detections
