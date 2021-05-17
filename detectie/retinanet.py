@@ -51,13 +51,15 @@ class RetinaNetLightning(pl.LightningModule):
         #)
         #self.extractor.fc = nn.Linear(512, 195, True)
 
+        anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
+        aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
         anchor_generator = AnchorGenerator(
-        sizes=((32, 64, 128, 256, 512),),
-        aspect_ratios=((0.5, 1.0, 2.0),)
-        )
+            anchor_sizes, aspect_ratios
+            )
+
         self.backbone = self.backbone1(False)
         # put the pieces together inside a RetinaNet model
-        model = models.detection.RetinaNet(self.backbone, num_classes=2,  anchor_generator=anchor_generator)
+        self.model = models.detection.RetinaNet(self.backbone, num_classes = 2)
 
         self.args = args
         self.save_hyperparameters()
