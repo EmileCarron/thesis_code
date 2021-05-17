@@ -23,6 +23,7 @@ from torchvision.models.detection.retinanet import RetinaNetRegressionHead
 from torch.nn import CosineEmbeddingLoss
 import wandb
 from collections import OrderedDict
+
 #import tensorflow as tf
 
 model_urls = {
@@ -35,7 +36,7 @@ class RetinaNetLightning(pl.LightningModule):
         super().__init__()
         #self.backbone.fc = nn.Linear(512, 2, True)
         #self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
-        self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
+        self.model = models.detection.retinanet_resnet50_fpn(pretrained=False)
         # state_dict = load_state_dict_from_url(model_urls['retinanet_resnet50_fpn_coco'],
         #                                       progress=True)
         # self.model.load_state_dict(state_dict)
