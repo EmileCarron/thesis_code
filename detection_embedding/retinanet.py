@@ -27,6 +27,7 @@ from torch.nn import CosineSimilarity
 import wandb
 from collections import OrderedDict
 from typing import Dict, List, Tuple, Optional
+from torch import nn, Tensor
 #import tensorflow as tf
 
 model_urls = {
