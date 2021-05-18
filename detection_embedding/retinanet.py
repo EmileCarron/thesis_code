@@ -75,9 +75,9 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
         for targets_per_image, cls_logits_per_image, matched_idxs_per_image in zip(targets, cls_logits, matched_idxs):
             # determine only the foreground
             foreground_idxs_per_image = matched_idxs_per_image >= 0
-            print(foreground_idxs_per_image)
+            #print(foreground_idxs_per_image)
             num_foreground = foreground_idxs_per_image.sum()
-            print(foreground_idxs_per_image)
+            #print(foreground_idxs_per_image)
 
             # create the target classification
             gt_classes_target = torch.zeros_like(cls_logits_per_image)
@@ -85,7 +85,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
 
             # find indices for which anchors should be ignored
             valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
-            print(valid_idxs_per_image)
+            #print(valid_idxs_per_image)
 
             # compute the classification loss
             losses.append(sigmoid_focal_loss(cls_logits_per_image[valid_idxs_per_image],gt_classes_target[valid_idxs_per_image],reduction='sum',) / max(1, num_foreground))
@@ -367,7 +367,7 @@ class RetinaNetLightning(pl.LightningModule):
             )
         self.anchor_generator = anchor_generator
         self.backbone = self.backbone1(False)
-        print(self.backbone.out_channels)
+        #print(self.backbone.out_channels)
         self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 195, self.args)
 
         #self.backbone.fc = nn.Linear(512, 2, True)
