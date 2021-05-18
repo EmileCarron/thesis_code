@@ -20,6 +20,8 @@ from torchvision.models.detection._utils import overwrite_eps
 from torchvision.models.detection.retinanet import RetinaNetHead
 from torchvision.models.detection.retinanet import RetinaNetClassificationHead
 from torchvision.models.detection.retinanet import RetinaNetRegressionHead
+from torchvision.models.detection import RetinaNet
+from torchvision.ops import sigmoid_focal_loss
 from torch.nn import CosineEmbeddingLoss
 from torch.nn import CosineSimilarity
 import wandb
@@ -34,6 +36,7 @@ model_urls = {
 class HeadJDE(RetinaNetHead):
     def __init__(self, in_channels, num_anchors, num_classes, args):
         super().__init__(in_channels, num_anchors, num_classes)
+        #import pdb; pdb.set_trace()
         self.args = args
         self.classification_head = RetinaNetClassificationHead(in_channels, num_anchors, num_classes)
         self.regression_head = RetinaNetRegressionHead(in_channels, num_anchors)
@@ -44,7 +47,7 @@ class HeadJDE(RetinaNetHead):
         return {
             'classification': self.classification_head.compute_loss(targets, head_outputs, matched_idxs),
             'bbox_regression': self.regression_head.compute_loss(targets, head_outputs, anchors, matched_idxs),
-            'embedding': self.embedding_head.compute_loss(targets, head_outputs, matched_idxs),
+            'embedding': self.embedding_head.compute_loss2(targets, head_outputs, matched_idxs),
         }
 
     def forward(self, x):
@@ -60,6 +63,35 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
         super().__init__(in_channels, num_anchors, num_classes, prior_probability=0.01) 
         self.args = args
         self.cos = CosineSimilarity()
+        self.fc = nn.Linear(201600, 141)
+
+    def compute_loss2(self, targets, head_outputs, matched_idxs):
+        
+        # type: (List[Dict[str, Tensor]], Dict[str, Tensor], List[Tensor]) -> Tensor
+        losses = []
+
+        cls_logits = head_outputs['embedding']
+
+        for targets_per_image, cls_logits_per_image, matched_idxs_per_image in zip(targets, cls_logits, matched_idxs):
+            # determine only the foreground
+            foreground_idxs_per_image = matched_idxs_per_image >= 0
+            print(foreground_idxs_per_image)
+            num_foreground = foreground_idxs_per_image.sum()
+            print(foreground_idxs_per_image)
+
+            # create the target classification
+            gt_classes_target = torch.zeros_like(cls_logits_per_image)
+            gt_classes_target[foreground_idxs_per_image, targets_per_image['labels'][matched_idxs_per_image[foreground_idxs_per_image]]] = 1.0
+
+            # find indices for which anchors should be ignored
+            valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
+            print(valid_idxs_per_image)
+
+            # compute the classification loss
+            losses.append(sigmoid_focal_loss(cls_logits_per_image[valid_idxs_per_image],gt_classes_target[valid_idxs_per_image],reduction='sum',) / max(1, num_foreground))
+            #losses.append(self.cos(cls_logits_per_image[valid_idxs_per_image], gt_classes_target[valid_idxs_per_image]) )
+
+        return _sum(losses) / len(targets)
 
     def compute_loss(self, targets, head_outputs, matched_idxs): 
         #import pdb; pdb.set_trace()
@@ -78,17 +110,21 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             #     foreground_idxs_per_image,
             #     targets_per_image['embedding'][matched_idxs_per_image[foreground_idxs_per_image]]
             # ] = 1.0
-
+            import pdb; pdb.set_trace()
             input_tensor = cls_logits_per_image.size()[0]
             output_tensor = targets_per_image['embedding'].size()[0]
-            if self.args.gpu == 'yes':
-                self.fc = nn.Linear(input_tensor, output_tensor).cuda()
-                cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
-                cls_logits_per_image = self.fc(cls_logits_per_image.cuda())
-            else:
-                self.fc = nn.Linear(input_tensor, output_tensor)
-                cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
-                cls_logits_per_image = self.fc(cls_logits_per_image)
+            print(targets_per_image['embedding'])
+            print(output_tensor)
+            # if self.args.gpu == 'yes':
+            #     self.fc = nn.Linear(input_tensor, output_tensor).cuda()
+            #     cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
+            #     cls_logits_per_image = self.fc(cls_logits_per_image.cuda())
+            # else:
+            #     self.fc = nn.Linear(input_tensor, output_tensor)
+            #     cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
+            #     cls_logits_per_image = self.fc(cls_logits_per_image)
+            cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
+            cls_logits_per_image = self.fc(cls_logits_per_image)
 
             #cls_logits_per_image = self.fc(cls_logits_per_image)
             cls_logits_per_image = torch.transpose(cls_logits_per_image, 0, 1)
@@ -105,6 +141,150 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
             losses.append(loss)
 
         return sum(losses) / len(targets) 
+
+class RetinaNetEmbedding(RetinaNet):
+    def __init__(self, backbone, num_classes,
+                 # transform parameters
+                 min_size=800, max_size=1333,
+                 image_mean=None, image_std=None,
+                 # Anchor parameters
+                 anchor_generator=None, head=None,
+                 proposal_matcher=None,
+                 score_thresh=0.05,
+                 nms_thresh=0.5,
+                 detections_per_img=300,
+                 fg_iou_thresh=0.5, bg_iou_thresh=0.4,
+                 topk_candidates=1000):
+        super().__init__(backbone, num_classes,
+                 # transform parameters
+                 min_size=800, max_size=1333,
+                 image_mean=None, image_std=None,
+                 # Anchor parameters
+                 anchor_generator=None, head=head,
+                 proposal_matcher=None,
+                 score_thresh=0.05,
+                 nms_thresh=0.5,
+                 detections_per_img=300,
+                 fg_iou_thresh=0.5, bg_iou_thresh=0.4,
+                 topk_candidates=1000)
+       
+
+    def eager_outputs(self, losses, detections, embedding):
+        # type: (Dict[str, Tensor], List[Dict[str, Tensor]]) -> Tuple[Dict[str, Tensor], List[Dict[str, Tensor]]]
+        #import pdb; pdb.set_trace()
+        if self.training:
+            return losses
+
+        return detections, embedding
+
+    def forward(self, images, targets=None):
+        # type: (List[Tensor], Optional[List[Dict[str, Tensor]]]) -> Tuple[Dict[str, Tensor], List[Dict[str, Tensor]]]
+        """
+        Args:
+            images (list[Tensor]): images to be processed
+            targets (list[Dict[Tensor]]): ground-truth boxes present in the image (optional)
+
+        Returns:
+            result (list[BoxList] or dict[Tensor]): the output from the model.
+                During training, it returns a dict[Tensor] which contains the losses.
+                During testing, it returns list[BoxList] contains additional fields
+                like `scores`, `labels` and `mask` (for Mask R-CNN models).
+
+        """
+        if self.training and targets is None:
+            raise ValueError("In training mode, targets should be passed")
+
+        if self.training:
+            assert targets is not None
+            for target in targets:
+                boxes = target["boxes"]
+                if isinstance(boxes, torch.Tensor):
+                    if len(boxes.shape) != 2 or boxes.shape[-1] != 4:
+                        raise ValueError("Expected target boxes to be a tensor"
+                                         "of shape [N, 4], got {:}.".format(
+                                             boxes.shape))
+                else:
+                    raise ValueError("Expected target boxes to be of type "
+                                     "Tensor, got {:}.".format(type(boxes)))
+
+        # get the original image sizes
+        original_image_sizes: List[Tuple[int, int]] = []
+        for img in images:
+            val = img.shape[-2:]
+            assert len(val) == 2
+            original_image_sizes.append((val[0], val[1]))
+
+        # transform the input
+        images, targets = self.transform(images, targets)
+
+        # Check for degenerate boxes
+        # TODO: Move this to a function
+        if targets is not None:
+            for target_idx, target in enumerate(targets):
+                boxes = target["boxes"]
+                degenerate_boxes = boxes[:, 2:] <= boxes[:, :2]
+                if degenerate_boxes.any():
+                    # print the first degenerate box
+                    bb_idx = torch.where(degenerate_boxes.any(dim=1))[0][0]
+                    degen_bb: List[float] = boxes[bb_idx].tolist()
+                    raise ValueError("All bounding boxes should have positive height and width."
+                                     " Found invalid box {} for target at index {}."
+                                     .format(degen_bb, target_idx))
+
+        # get the features from the backbone
+        features = self.backbone(images.tensors)
+        if isinstance(features, torch.Tensor):
+            features = OrderedDict([('0', features)])
+
+        # TODO: Do we want a list or a dict?
+        features = list(features.values())
+        #import pdb; pdb.set_trace()
+        # compute the retinanet heads outputs using the features
+        head_outputs = self.head(features)
+
+        # create the set of anchors
+        anchors = self.anchor_generator(images, features)
+
+        losses = {}
+        detections: List[Dict[str, Tensor]] = []
+        if self.training:
+            assert targets is not None
+
+            # compute the losses
+            losses = self.compute_loss(targets, head_outputs, anchors)
+        else:
+            # recover level sizes
+            num_anchors_per_level = [x.size(2) * x.size(3) for x in features]
+            HW = 0
+            for v in num_anchors_per_level:
+                HW += v
+            HWA = head_outputs['cls_logits'].size(1)
+            A = HWA // HW
+            num_anchors_per_level = [hw * A for hw in num_anchors_per_level]
+
+            # split outputs per level
+            split_head_outputs: Dict[str, List[Tensor]] = {}
+            for k in head_outputs:
+                split_head_outputs[k] = list(head_outputs[k].split(num_anchors_per_level, dim=1))
+            split_anchors = [list(a.split(num_anchors_per_level)) for a in anchors]
+
+            # compute the detections
+            detections = self.postprocess_detections(split_head_outputs, split_anchors, images.image_sizes)
+            detections = self.transform.postprocess(detections, images.image_sizes, original_image_sizes)
+
+        if torch.jit.is_scripting():
+            if not self._has_warned:
+                warnings.warn("RetinaNet always returns a (Losses, Detections) tuple in scripting")
+                self._has_warned = True
+            return losses, detections
+        return self.eager_outputs(losses, detections, head_outputs['embedding'])
+
+
+model_urls = {
+    'retinanet_resnet50_fpn_coco':
+        'https://download.pytorch.org/models/retinanet_resnet50_fpn_coco-eeacb38b.pth',
+}
+
         
 
 
@@ -187,10 +367,11 @@ class RetinaNetLightning(pl.LightningModule):
             )
         self.anchor_generator = anchor_generator
         self.backbone = self.backbone1(False)
+        print(self.backbone.out_channels)
         self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 195, self.args)
 
         #self.backbone.fc = nn.Linear(512, 2, True)
-        self.model = models.detection.RetinaNet(self.backbone, num_classes = 195, head= self.head)
+        self.model = RetinaNetEmbedding(self.backbone, num_classes = 195, head= self.head)
         #self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
         # state_dict = load_state_dict_from_url(model_urls['retinanet_resnet50_fpn_coco'],
         #                                       progress=True)
@@ -293,8 +474,8 @@ class RetinaNetLightning(pl.LightningModule):
             y[0]['embedding'][counter] = predictions_embedding
             counter = counter + 1
             
-        import pdb; pdb.set_trace()
-        detections = self.model(x,y)
+        #import pdb; pdb.set_trace()
+        detections, embedding = self.model(x,y)
         return detections
        
     def configure_optimizers(self):
