@@ -71,7 +71,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
         super().__init__(in_channels, num_anchors, num_classes, prior_probability=0.01) 
         self.args = args
         self.cos = CosineSimilarity()
-        self.fc = nn.Linear(201600, 141)
+        #self.fc = nn.Linear(201600, 141)
 
     def compute_loss2(self, targets, head_outputs, matched_idxs):
         
@@ -79,7 +79,7 @@ class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
         losses = []
 
         cls_logits = head_outputs['embedding']
-
+        #import pdb; pdb.set_trace()
         for targets_per_image, cls_logits_per_image, matched_idxs_per_image in zip(targets, cls_logits, matched_idxs):
             # determine only the foreground
             foreground_idxs_per_image = matched_idxs_per_image >= 0
@@ -177,13 +177,13 @@ class RetinaNetEmbedding(RetinaNet):
                  topk_candidates=1000)
        
 
-    def eager_outputs(self, losses, detections, embedding):
+    def eager_outputs(self, losses, detections, embedding512, embedding195):
         # type: (Dict[str, Tensor], List[Dict[str, Tensor]]) -> Tuple[Dict[str, Tensor], List[Dict[str, Tensor]]]
         #import pdb; pdb.set_trace()
         if self.training:
             return losses
 
-        return detections, embedding
+        return detections, embedding512, embedding195
 
     def forward(self, images, targets=None):
         # type: (List[Tensor], Optional[List[Dict[str, Tensor]]]) -> Tuple[Dict[str, Tensor], List[Dict[str, Tensor]]]
@@ -285,7 +285,7 @@ class RetinaNetEmbedding(RetinaNet):
                 warnings.warn("RetinaNet always returns a (Losses, Detections) tuple in scripting")
                 self._has_warned = True
             return losses, detections
-        return self.eager_outputs(losses, detections, head_outputs['embedding'])
+        return self.eager_outputs(losses, detections, head_outputs['embedding'], head_outputs['cls_logits'])
 
 
 model_urls = {
@@ -374,7 +374,7 @@ class RetinaNetLightning(pl.LightningModule):
             anchor_sizes, aspect_ratios
             )
         self.anchor_generator = anchor_generator
-        self.backbone = self.backbone1(False)
+        self.backbone = self.backbone1(True)
         #print(self.backbone.out_channels)
         self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 195, self.args)
 
@@ -401,7 +401,7 @@ class RetinaNetLightning(pl.LightningModule):
         return teacher_model
 
 
-    def backbone1(self, pretrained_backbone, pretrained=False, trainable_backbone_layers=None):
+    def backbone1(self, pretrained_backbone, pretrained=True, trainable_backbone_layers=None):
         trainable_backbone_layers = _validate_trainable_layers(
         pretrained or pretrained_backbone, trainable_backbone_layers, 5, 3)
 
@@ -434,13 +434,13 @@ class RetinaNetLightning(pl.LightningModule):
             self.tm_full.eval()
             self.tm_extractor.eval()
             #predictions = self.tm_full(image)
-            predictions_embedding = self.tm_extractor(image)
+            #predictions_embedding = self.tm_extractor(image)
             predictions = self.tm_full(image)
             _, predicted = torch.max(predictions.data, 1)
-            predictions_embedding = torch.squeeze(predictions_embedding)
-            predictions_embedding = predictions_embedding.clone().detach()
+            #predictions_embedding = torch.squeeze(predictions_embedding)
+            #predictions_embedding = predictions_embedding.clone().detach()
             y[0]['labels'][counter] = predicted 
-            y[0]['embedding'][counter] = predictions_embedding
+            #y[0]['embedding'][counter] = predictions_embedding
             counter = counter + 1
 
         losses = self.model(x,y)
@@ -473,17 +473,17 @@ class RetinaNetLightning(pl.LightningModule):
             self.tm_full.eval()
             self.tm_extractor.eval()
             #predictions = self.tm_full(image)
-            predictions_embedding = self.tm_extractor(image)
+            #predictions_embedding = self.tm_extractor(image)
             predictions = self.tm_full(image)
             _, predicted = torch.max(predictions.data, 1)
-            predictions_embedding = torch.squeeze(predictions_embedding)
-            predictions_embedding = predictions_embedding.clone().detach()
+            #predictions_embedding = torch.squeeze(predictions_embedding)
+            #predictions_embedding = predictions_embedding.clone().detach()
             y[0]['labels'][counter] = predicted 
-            y[0]['embedding'][counter] = predictions_embedding
+            #y[0]['embedding'][counter] = predictions_embedding
             counter = counter + 1
             
         #import pdb; pdb.set_trace()
-        detections, embedding = self.model(x,y)
+        detections, embedding512, embedding195 = self.model(x,y)
         return detections
        
     def configure_optimizers(self):
