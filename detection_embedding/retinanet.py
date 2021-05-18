@@ -33,6 +33,12 @@ model_urls = {
         'https://download.pytorch.org/models/retinanet_resnet50_fpn_coco-eeacb38b.pth',
 }
 
+def _sum(x: List[Tensor]) -> Tensor:
+    res = x[0]
+    for i in x[1:]:
+        res = res + i
+    return res
+
 class HeadJDE(RetinaNetHead):
     def __init__(self, in_channels, num_anchors, num_classes, args):
         super().__init__(in_channels, num_anchors, num_classes)
