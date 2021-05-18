@@ -94,6 +94,11 @@ class RetinaNetLightning(pl.LightningModule):
 
         import pdb; pdb.set_trace()
         detections = self.model(x,y)
+        scores = detections[0]['scores']
+        length = scores.size()[0]
+        totscore = torch.sum(scores)
+        totscore = torch.div(totscore, length)
+        self.log("Score", totscore, on_step=True, on_epoch=True)
         #print(detections)
         return detections
        
