@@ -185,6 +185,69 @@ class RetinaNetEmbedding(RetinaNet):
 
         return detections, embedding512, embedding195
 
+    def postprocess_detections(self, head_outputs, anchors, image_shapes):
+            # type: (Dict[str, List[Tensor]], List[List[Tensor]], List[Tuple[int, int]]) -> List[Dict[str, Tensor]]
+        import pdb; pdb.set_trace()
+        class_logits = head_outputs['cls_logits']
+        box_regression = head_outputs['bbox_regression']
+
+        num_images = len(image_shapes)
+
+        detections: List[Dict[str, Tensor]] = []
+
+        for index in range(num_images):
+            box_regression_per_image = [br[index] for br in box_regression]
+            logits_per_image = [cl[index] for cl in class_logits]
+            anchors_per_image, image_shape = anchors[index], image_shapes[index]
+
+            image_boxes = []
+            image_scores = []
+            image_labels = []
+
+            for box_regression_per_level, logits_per_level, anchors_per_level in \
+                    zip(box_regression_per_image, logits_per_image, anchors_per_image):
+                num_classes = logits_per_level.shape[-1]
+
+                # remove low scoring boxes
+                scores_per_level = torch.sigmoid(logits_per_level).flatten()
+                keep_idxs = scores_per_level > self.score_thresh
+                scores_per_level = scores_per_level[keep_idxs]
+                topk_idxs = torch.where(keep_idxs)[0]
+
+                # keep only topk scoring predictions
+                num_topk = min(self.topk_candidates, topk_idxs.size(0))
+                scores_per_level, idxs = scores_per_level.topk(num_topk)
+                topk_idxs = topk_idxs[idxs]
+
+                anchor_idxs = torch.div(topk_idxs, num_classes, rounding_mode='floor')
+                labels_per_level = topk_idxs % num_classes
+
+                boxes_per_level = self.box_coder.decode_single(box_regression_per_level[anchor_idxs],
+                                                               anchors_per_level[anchor_idxs])
+                boxes_per_level = box_ops.clip_boxes_to_image(boxes_per_level, image_shape)
+
+                image_boxes.append(boxes_per_level)
+                image_scores.append(scores_per_level)
+                image_labels.append(labels_per_level)
+
+            image_boxes = torch.cat(image_boxes, dim=0)
+            image_scores = torch.cat(image_scores, dim=0)
+            image_labels = torch.cat(image_labels, dim=0)
+
+            # non-maximum suppression
+            keep = box_ops.batched_nms(image_boxes, image_scores, image_labels, self.nms_thresh)
+            keep = keep[:self.detections_per_img]
+
+            detections.append({
+                'boxes': image_boxes[keep],
+                'scores': image_scores[keep],
+                'labels': image_labels[keep],
+            })
+
+        return detections
+
+            
+
     def forward(self, images, targets=None):
         # type: (List[Tensor], Optional[List[Dict[str, Tensor]]]) -> Tuple[Dict[str, Tensor], List[Dict[str, Tensor]]]
         """
@@ -293,7 +356,7 @@ model_urls = {
         'https://download.pytorch.org/models/retinanet_resnet50_fpn_coco-eeacb38b.pth',
 }
 
-        
+    
 
 
 class RecognitionModel(pl.LightningModule):
