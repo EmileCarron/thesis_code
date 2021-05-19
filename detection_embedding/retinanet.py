@@ -22,6 +22,7 @@ from torchvision.models.detection.retinanet import RetinaNetClassificationHead
 from torchvision.models.detection.retinanet import RetinaNetRegressionHead
 from torchvision.models.detection import RetinaNet
 from torchvision.ops import sigmoid_focal_loss
+from torchvision.ops import boxes as box_ops
 from torch.nn import CosineEmbeddingLoss
 from torch.nn import CosineSimilarity
 import wandb
