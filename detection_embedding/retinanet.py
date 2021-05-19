@@ -188,7 +188,7 @@ class RetinaNetEmbedding(RetinaNet):
 
     def postprocess_detections(self, head_outputs, anchors, image_shapes):
             # type: (Dict[str, List[Tensor]], List[List[Tensor]], List[Tuple[int, int]]) -> List[Dict[str, Tensor]]
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         class_logits = head_outputs['cls_logits']
         box_regression = head_outputs['bbox_regression']
 

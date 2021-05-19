@@ -52,6 +52,7 @@ def main(args):
     wandb.init(project='thesis', entity='mille')
 
     model = RetinaNetLightning(args)
+    model.load_from_checkpoint(checkpoint_path=args.checkpoint1, args=args)
     dm = RetinaNetDataModule()
 
     #trainer = pl.Trainer.from_argparse_args(args,  gpus=0 if torch.cuda.is_available() else 0)
@@ -69,6 +70,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--data_dir', type=str, default='../../../dataset')
     parser.add_argument('--checkpoint', type=str, default='')
+    parser.add_argument('--checkpoint1', type=str, default='')
     parser.add_argument('--loss', type=str, default= 'CrossEntropy',
                             help='The name of the loss function to use.',
                             choices=['CrossEntropy', 'ArcFace',
