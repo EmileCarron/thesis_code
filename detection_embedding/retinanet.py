@@ -204,6 +204,7 @@ class RetinaNetEmbedding(RetinaNet):
             image_boxes = []
             image_scores = []
             image_labels = []
+            image_embedding = []
 
             for box_regression_per_level, logits_per_level, anchors_per_level in \
                     zip(box_regression_per_image, logits_per_image, anchors_per_image):
@@ -219,6 +220,8 @@ class RetinaNetEmbedding(RetinaNet):
                 num_topk = min(self.topk_candidates, topk_idxs.size(0))
                 scores_per_level, idxs = scores_per_level.topk(num_topk)
                 topk_idxs = topk_idxs[idxs]
+                indxembd = torch.div(idxs, num_classes, rounding_mode='floor')
+                embeddings_per_level = logits_per_level[indxembd]
 
                 anchor_idxs = torch.div(topk_idxs, num_classes, rounding_mode='floor')
                 labels_per_level = topk_idxs % num_classes
@@ -230,10 +233,12 @@ class RetinaNetEmbedding(RetinaNet):
                 image_boxes.append(boxes_per_level)
                 image_scores.append(scores_per_level)
                 image_labels.append(labels_per_level)
+                image_embedding.append(embeddings_per_level)
 
             image_boxes = torch.cat(image_boxes, dim=0)
             image_scores = torch.cat(image_scores, dim=0)
             image_labels = torch.cat(image_labels, dim=0)
+            image_embedding = torch.cat(image_embedding, dim=0)
 
             # non-maximum suppression
             keep = box_ops.batched_nms(image_boxes, image_scores, image_labels, self.nms_thresh)
@@ -243,6 +248,7 @@ class RetinaNetEmbedding(RetinaNet):
                 'boxes': image_boxes[keep],
                 'scores': image_scores[keep],
                 'labels': image_labels[keep],
+                'embeddings': image_embedding[keep],
             })
 
         return detections
