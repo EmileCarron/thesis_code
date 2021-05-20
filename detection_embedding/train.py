@@ -78,6 +78,7 @@ if __name__ == '__main__':
                                      'CircleLoss', 'LargeMarginSoftmaxLoss'])
     parser.add_argument('--gpu', type=str, default='yes')
     parser.add_argument('--optim', type=str, default='SGD')
+    parser.add_argument('--embedding_size', type=int, default=512)
     parser = pl.Trainer.add_argparse_args(parser)
     args = parser.parse_args()
     main(args)
