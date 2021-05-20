@@ -14,7 +14,6 @@ class BBtrans(Dataset):
         w = size["size"][0][0]
         h = size["size"][0][1]
         counter = 0
-        #import pdb; pdb.set_trace()
         b = target['boxes']
         l = target['labels']
         colum0 = b[:,0]

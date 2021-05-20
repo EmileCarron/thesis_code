@@ -65,27 +65,16 @@ class Sku(Dataset):
             
         img_name = os.path.join(self.root_dir, self.images[idx])
         image = cv2.imread(img_name)
-        #print(img_name)
         target = self.targets[idx]
         size = self.size[idx]
-        #import pdb; pdb.set_trace()
         if(self.transform is not None):
             target = BBtrans()(target, size)
             transformed = self.transform(image=image, bboxes=target['boxes'], class_labels=target['labels'])
             image = transformed['image']
             target['boxes'] = torch.tensor(transformed['bboxes'])
             target['labels'] = torch.tensor(transformed['class_labels'])
-            #target['embedding'] = torch.tensor(target['embedding'], requires_grad=True)
             pil_image=Image.fromarray(image)
             image = ToTensor()(pil_image)
     
         return image, target
         
-# Driver code
-#train_set = Sku(csv_file = '/Users/emilecarron/Documents/School/Universiteit/1ma/Masterproef/Tutorial/5/SKU110K_fixed/annotations/annotations_train.csv',root_dir = '../../../datasets/sku110k/images')
-
-#train_set[0]
-#train_set[1000]
-#train_set[100000]
-
-

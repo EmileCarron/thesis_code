@@ -71,7 +71,6 @@ class RetinaNetLightning(pl.LightningModule):
 
         
     def training_step(self, batch, batch_idx):
-        #import pdb; pdb.set_trace()
         x, y = batch
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])
@@ -85,7 +84,6 @@ class RetinaNetLightning(pl.LightningModule):
         return losses['classification'] + losses['bbox_regression']
         
     def validation_step(self, batch, batch_idx):
-        #import pdb; pdb.set_trace()
         x, y = batch
         y = [{'boxes': b, 'labels': l}
         for b, l in zip(y['boxes'],y['labels'])
@@ -99,7 +97,6 @@ class RetinaNetLightning(pl.LightningModule):
         totscore = torch.sum(scores)
         totscore = torch.div(totscore, length)
         self.log("Score", totscore, on_step=True, on_epoch=True)
-        #print(detections)
         return detections
        
     def configure_optimizers(self):
