@@ -48,7 +48,7 @@ class HeadJDE(RetinaNetHead):
         self.args = args
         self.classification_head = RetinaNetClassificationHead(in_channels, num_anchors, num_classes)
         self.regression_head = RetinaNetRegressionHead(in_channels, num_anchors)
-        self.embedding_head = RetinaNetEmbeddingHead(in_channels, num_anchors, 512, self.args)
+        self.embedding_head = RetinaNetEmbeddingHead(in_channels, num_anchors, args.embedding_size, self.args)
 
     def compute_loss(self, targets, head_outputs, anchors, matched_idxs):
         # type: (List[Dict[str, Tensor]], Dict[str, Tensor], List[Tensor], List[Tensor]) -> Dict[str, Tensor]
