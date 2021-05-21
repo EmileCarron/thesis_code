@@ -13,6 +13,7 @@ from recognition import RecognitionModel
 import json
 from torchvision.datasets.utils import download_url#)download_and_extract_archive,
 from aliproducts import AliProducts
+from rp2k import RP2KDataset
 from PIL import Image
 from copy import deepcopy
 import wandb
@@ -44,7 +45,26 @@ class Prod10kDataModule(pl.LightningDataModule):
         
     def val_dataloader(self):
         return DataLoader(self.val_set, batch_size = self.batch_size, num_workers = args.num_workers)
+
+class Rp2kDataModule(pl.LightningDataModule):
+    def __init__(self, data_dir, batch_size, num_workers):
+        super().__init__()
+        self.num_workers = num_workers
+        self.batch_size = batch_size
+        self.root = data_dir + '/Rp2k'
+
+    def setup(self, stage=None):
+        train_tfm = self.get_transform()
+        if stage == 'fit' or stage is None:
+            self.train_set = RP2KDataset(root = self.root, max_per_label)
+            self.train_set, self.val_set = torch.utils.data.random_split(self.train_set, [5000, len(self.train_set)-5000])
+            
+    def train_dataloader(self):
+        return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = self.num_workers)
         
+    def val_dataloader(self):
+        return DataLoader(self.val_set, batch_size = self.batch_size, num_workers = self.num_workers)
+     
 class AliproductsDataModule(pl.LightningDataModule):
     def __init__(self, data_dir, batch_size, num_workers):
         super().__init__()
