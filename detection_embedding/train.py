@@ -52,7 +52,7 @@ def main(args):
     wandb.init(project='thesis', entity='mille')
 
     model = RetinaNetLightning(args)
-    model.load_from_checkpoint(checkpoint_path=args.checkpoint1, args=args)
+    #model.load_from_checkpoint(checkpoint_path=args.checkpoint1, args=args)
     dm = RetinaNetDataModule()
 
     #trainer = pl.Trainer.from_argparse_args(args,  gpus=0 if torch.cuda.is_available() else 0)
