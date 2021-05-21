@@ -51,13 +51,32 @@ class Rp2kDataModule(pl.LightningDataModule):
         super().__init__()
         self.num_workers = num_workers
         self.batch_size = batch_size
-        self.root = data_dir + '/Rp2k'
+        self.root = data_dir
+
+    def get_transform(self, normalize=True, to_tensor=True):
+        """Return the image transformation for the given dataset type.
+
+        Args:
+            data_type (str): The type of dataset. Should be one of 'train',
+            'val' or 'test'.
+            normalize (bool): If True, include ImageNet-style normalization.
+            to_tensor (bool): If True, transform the PIL Image to a tensor.
+        """
+       
+        tfms = [transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip()]
+        
+        tfms.append(transforms.ToTensor())
+        tfms.append(transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                             std=[0.229, 0.224, 0.225]))
+
+        return transforms.Compose(tfms)
 
     def setup(self, stage=None):
         train_tfm = self.get_transform()
         if stage == 'fit' or stage is None:
-            self.train_set = RP2KDataset(root = self.root, max_per_label)
-            self.train_set, self.val_set = torch.utils.data.random_split(self.train_set, [5000, len(self.train_set)-5000])
+            self.train_set = RP2KDataset(data_root = self.root, transforms = train_tfm)
+            self.train_set, self.val_set = torch.utils.data.random_split(self.train_set, [8000, len(self.train_set)-8000])
             
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = self.num_workers)
@@ -115,7 +134,8 @@ def main(args):
     wandb_logger = WandbLogger()
     wandb.init(project = 'masterproef', entity = 'mille')
 
-    dm = AliproductsDataModule(data_dir = args.data_dir ,batch_size = args.batch_size, num_workers = args.num_workers)
+    #dm = AliproductsDataModule(data_dir = args.data_dir ,batch_size = args.batch_size, num_workers = args.num_workers)
+    dm = Rp2kDataModule(data_dir = args.data_dir ,batch_size = args.batch_size, num_workers = args.num_workers)
     model = RecognitionModel(args)
     
     if len(args.checkpoint) != 0:
