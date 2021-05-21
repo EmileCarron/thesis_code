@@ -477,13 +477,13 @@ class RetinaNetLightning(pl.LightningModule):
             _, predicted = torch.max(predictions.data, 1)
             y[0]['labels'][counter] = predicted 
             counter = counter + 1
-
+        import pdb; pdb.set_trace()
         detections, embedding512, embedding195 = self.model(x,y)
-        labels = y[0]['labels']
-        embedding = detections['embeddings']
-        loss = self.loss(embedding, labels)
-
-        self.log("loss_validation", loss, on_step=True, on_epoch=True)
+        embedding = detections[0]['labels']
+        labels = detections[0]['embeddings']
+        if(detections[0]['labels'].size() != torch.Size([0])):
+            loss = self.loss(embedding, labels)
+            self.log("loss_validation", loss, on_step=True, on_epoch=True)
 
         return detections
        
