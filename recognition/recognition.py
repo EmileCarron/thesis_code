@@ -23,7 +23,7 @@ class RecognitionModel(pl.LightningModule):
         #ckpt = '../../../Masterproef/thesis_code/recognition/wandb/run-20210409_112741-28fdpx5s/files/thesis/28fdpx5s/checkpoints/epoch=299-step=18899.ckpt' 
         
         self.model = torchvision.models.resnet18(pretrained=True)
-        self.model.fc = nn.Linear(512, 195, True)
+        self.model.fc = nn.Linear(512, 2378, True)
         self.args = args
 
         self.extractor = torch.nn.Sequential(
@@ -79,7 +79,7 @@ class RecognitionModel(pl.LightningModule):
 
 
     def accuracy(self, logits, labels):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         _, predicted = torch.max(logits.data, 1)
         correct = (predicted == labels).sum().item()
         accuracy = correct / len(labels)
