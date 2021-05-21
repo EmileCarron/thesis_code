@@ -400,6 +400,10 @@ class RetinaNetLightning(pl.LightningModule):
         self.tm_extractor = self.teacher_model.get_extractor()
         self.data_dir = args.data_dir
 
+        if self.args.loss == 'CrossEntropy':
+            self.loss = torch.nn.CrossEntropyLoss()
+            self.loss_requires_classifier = True
+
     def teacher(self, args):
         teacher = RecognitionModel(args)
         teacher_model = teacher.load_from_checkpoint(checkpoint_path=args.checkpoint, args=args)
@@ -475,6 +479,12 @@ class RetinaNetLightning(pl.LightningModule):
             counter = counter + 1
 
         detections, embedding512, embedding195 = self.model(x,y)
+        labels = y[0]['labels']
+        embedding = detections['embeddings']
+        loss = self.loss(embedding, labels)
+
+        self.log("loss_validation", loss, on_step=True, on_epoch=True)
+
         return detections
        
     def configure_optimizers(self):
