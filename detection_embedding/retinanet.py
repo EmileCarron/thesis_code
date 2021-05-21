@@ -447,12 +447,12 @@ class RetinaNetLightning(pl.LightningModule):
             counter = counter + 1
 
         losses = self.model(x,y)
-        tot = (losses['classification'] + losses['bbox_regression'] + losses['embedding'])/3
+        tot = (losses['classification'] + losses['bbox_regression'] + losses['embedding'])
         self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
         self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
         self.log("loss_training_embedding", losses['embedding'], on_step=True, on_epoch=True)
         self.log("loss_training", tot, on_step=True, on_epoch=True)
-        return (losses['classification'] + losses['bbox_regression'] + losses['embedding'])/3
+        return (losses['classification'] + losses['bbox_regression'] + losses['embedding'])
         
     def validation_step(self, batch, batch_idx):
         x, y = batch
@@ -477,7 +477,7 @@ class RetinaNetLightning(pl.LightningModule):
             _, predicted = torch.max(predictions.data, 1)
             y[0]['labels'][counter] = predicted 
             counter = counter + 1
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         detections, embedding512, embedding195 = self.model(x,y)
         embedding = detections[0]['labels']
         labels = detections[0]['embeddings']
