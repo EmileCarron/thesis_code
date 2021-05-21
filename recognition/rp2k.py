@@ -37,6 +37,7 @@ class RP2KDataset(Dataset):
             lab: idx for idx, lab in enumerate(self.labels)
         }
         self.num_classes = len(self.labels)
+        print(self.num_classes)
 
     def __len__(self):
         return len(self.df)
