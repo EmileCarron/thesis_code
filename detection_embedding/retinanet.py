@@ -48,14 +48,14 @@ class HeadJDE(RetinaNetHead):
         self.args = args
         self.classification_head = RetinaNetClassificationHead(in_channels, num_anchors, num_classes)
         self.regression_head = RetinaNetRegressionHead(in_channels, num_anchors)
-        self.embedding_head = RetinaNetEmbeddingHead(in_channels, num_anchors, args.embedding_size, self.args)
+        #self.embedding_head = RetinaNetEmbeddingHead(in_channels, num_anchors, args.embedding_size, self.args)
 
     def compute_loss(self, targets, head_outputs, anchors, matched_idxs):
         # type: (List[Dict[str, Tensor]], Dict[str, Tensor], List[Tensor], List[Tensor]) -> Dict[str, Tensor]
         return {
             'classification': self.classification_head.compute_loss(targets, head_outputs, matched_idxs),
             'bbox_regression': self.regression_head.compute_loss(targets, head_outputs, anchors, matched_idxs),
-            'embedding': self.embedding_head.compute_loss(targets, head_outputs, matched_idxs),
+            #'embedding': self.embedding_head.compute_loss(targets, head_outputs, matched_idxs),
         }
 
     def forward(self, x):
@@ -63,7 +63,7 @@ class HeadJDE(RetinaNetHead):
         return {
             'cls_logits': self.classification_head(x),
             'bbox_regression': self.regression_head(x),
-            'embedding': self.embedding_head(x),
+            #'embedding': self.embedding_head(x),
         }
 
 class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
@@ -482,10 +482,10 @@ class RetinaNetLightning(pl.LightningModule):
         detections, losses = self.model(x,y)
         
         tot = (losses['classification'] + losses['bbox_regression'] + losses['embedding'])
-        self.log("loss_training_class", losses['classification'], on_step=False, on_epoch=True)
-        self.log("loss_training_bb", losses['bbox_regression'], on_step=False, on_epoch=True)
-        self.log("loss_training_embedding", losses['embedding'], on_step=False, on_epoch=True)
-        self.log("loss_training", tot, on_step=False, on_epoch=True)
+        self.log("loss_validation_class", losses['classification'], on_step=False, on_epoch=True)
+        self.log("loss_validation_bb", losses['bbox_regression'], on_step=False, on_epoch=True)
+        self.log("loss_validation_embedding", losses['embedding'], on_step=False, on_epoch=True)
+        self.log("loss_validation", tot, on_step=False, on_epoch=True)
 
         return detections
        
