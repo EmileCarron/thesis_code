@@ -393,7 +393,7 @@ class RetinaNetLightning(pl.LightningModule):
             )
         self.anchor_generator = anchor_generator
         self.backbone = self.backbone1(True)
-        self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 195, self.args)
+        self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 2378, self.args)
         self.model = RetinaNetEmbedding(self.backbone, num_classes = 2378, head= self.head)  
         self.save_hyperparameters()
         self.teacher_model = self.teacher(args)
