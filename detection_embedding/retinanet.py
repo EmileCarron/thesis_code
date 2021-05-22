@@ -123,12 +123,12 @@ class RetinaNetEmbedding(RetinaNet):
                  topk_candidates=1000)
        
 
-    def eager_outputs(self, losses, detections, embedding512, embedding195):
+    def eager_outputs(self, losses, detections):
         # type: (Dict[str, Tensor], List[Dict[str, Tensor]]) -> Tuple[Dict[str, Tensor], List[Dict[str, Tensor]]]
         if self.training:
             return losses
 
-        return detections, embedding512, embedding195
+        return detections, losses
 
     def postprocess_detections(self, head_outputs, anchors, image_shapes):
             # type: (Dict[str, List[Tensor]], List[List[Tensor]], List[Tuple[int, int]]) -> List[Dict[str, Tensor]]
@@ -299,13 +299,14 @@ class RetinaNetEmbedding(RetinaNet):
             # compute the detections
             detections = self.postprocess_detections(split_head_outputs, split_anchors, images.image_sizes)
             detections = self.transform.postprocess(detections, images.image_sizes, original_image_sizes)
+            losses = self.compute_loss(targets, head_outputs, anchors)
 
         if torch.jit.is_scripting():
             if not self._has_warned:
                 warnings.warn("RetinaNet always returns a (Losses, Detections) tuple in scripting")
                 self._has_warned = True
             return losses, detections
-        return self.eager_outputs(losses, detections, head_outputs['embedding'], head_outputs['cls_logits'])
+        return self.eager_outputs(losses, detections)
 
 
 model_urls = {
@@ -448,10 +449,10 @@ class RetinaNetLightning(pl.LightningModule):
 
         losses = self.model(x,y)
         tot = (losses['classification'] + losses['bbox_regression'] + losses['embedding'])
-        self.log("loss_training_class", losses['classification'], on_step=True, on_epoch=True)
-        self.log("loss_training_bb", losses['bbox_regression'], on_step=True, on_epoch=True)
-        self.log("loss_training_embedding", losses['embedding'], on_step=True, on_epoch=True)
-        self.log("loss_training", tot, on_step=True, on_epoch=True)
+        self.log("loss_training_class", losses['classification'], on_step=False, on_epoch=True)
+        self.log("loss_training_bb", losses['bbox_regression'], on_step=False, on_epoch=True)
+        self.log("loss_training_embedding", losses['embedding'], on_step=False, on_epoch=True)
+        self.log("loss_training", tot, on_step=False, on_epoch=True)
         return (losses['classification'] + losses['bbox_regression'] + losses['embedding'])
         
     def validation_step(self, batch, batch_idx):
@@ -477,13 +478,14 @@ class RetinaNetLightning(pl.LightningModule):
             _, predicted = torch.max(predictions.data, 1)
             y[0]['labels'][counter] = predicted 
             counter = counter + 1
-        #import pdb; pdb.set_trace()
-        detections, embedding512, embedding195 = self.model(x,y)
-        embedding = detections[0]['labels']
-        labels = detections[0]['embeddings']
-        if(detections[0]['labels'].size() != torch.Size([0])):
-            loss = self.loss(embedding, labels)
-            self.log("loss_validation", loss, on_step=True, on_epoch=True)
+        import pdb; pdb.set_trace()
+        detections, losses = self.model(x,y)
+        
+        tot = (losses['classification'] + losses['bbox_regression'] + losses['embedding'])
+        self.log("loss_training_class", losses['classification'], on_step=False, on_epoch=True)
+        self.log("loss_training_bb", losses['bbox_regression'], on_step=False, on_epoch=True)
+        self.log("loss_training_embedding", losses['embedding'], on_step=False, on_epoch=True)
+        self.log("loss_training", tot, on_step=False, on_epoch=True)
 
         return detections
        
