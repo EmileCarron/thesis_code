@@ -441,7 +441,7 @@ class RetinaNetLightning(pl.LightningModule):
 
             image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
             self.tm_full.eval()
-            self.tm_extractor.eval()
+            #self.tm_extractor.eval()
             predictions = self.tm_full(image)
             _, predicted = torch.max(predictions.data, 1)
             y[0]['labels'][counter] = predicted 
@@ -473,7 +473,7 @@ class RetinaNetLightning(pl.LightningModule):
 
             image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
             self.tm_full.eval()
-            self.tm_extractor.eval()
+            #self.tm_extractor.eval()
             predictions = self.tm_full(image)
             _, predicted = torch.max(predictions.data, 1)
             y[0]['labels'][counter] = predicted 
