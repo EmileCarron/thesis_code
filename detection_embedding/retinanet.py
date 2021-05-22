@@ -321,7 +321,7 @@ class RecognitionModel(pl.LightningModule):
         #ckpt = '../../../Masterproef/thesis_code/recognition/wandb/run-20210409_112741-28fdpx5s/files/thesis/28fdpx5s/checkpoints/epoch=299-step=18899.ckpt' 
         
         self.model = torchvision.models.resnet18(pretrained=True)
-        self.model.fc = nn.Linear(512, 195, True)
+        self.model.fc = nn.Linear(512, 2378, True)
         self.args = args
 
 
