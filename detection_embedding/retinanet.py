@@ -478,7 +478,7 @@ class RetinaNetLightning(pl.LightningModule):
             _, predicted = torch.max(predictions.data, 1)
             y[0]['labels'][counter] = predicted 
             counter = counter + 1
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         detections, losses = self.model(x,y)
         
         tot = (losses['classification'] + losses['bbox_regression'] + losses['embedding'])
