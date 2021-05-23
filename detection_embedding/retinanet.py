@@ -453,6 +453,7 @@ class RetinaNetLightning(pl.LightningModule):
         self.log("loss_training_bb", losses['bbox_regression'], on_step=False, on_epoch=True)
         #self.log("loss_training_embedding", losses['embedding'], on_step=False, on_epoch=True)
         self.log("loss_training", tot, on_step=False, on_epoch=True)
+        torch.cuda.empty_cache()
         return (losses['classification'] + losses['bbox_regression'])
         
     def validation_step(self, batch, batch_idx):
@@ -486,6 +487,7 @@ class RetinaNetLightning(pl.LightningModule):
         self.log("loss_validation_bb", losses['bbox_regression'], on_step=False, on_epoch=True)
         #self.log("loss_validation_embedding", losses['embedding'], on_step=False, on_epoch=True)
         self.log("loss_validation", tot, on_step=False, on_epoch=True)
+        torch.cuda.empty_cache()
 
         return detections
        
