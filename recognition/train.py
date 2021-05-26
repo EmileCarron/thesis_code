@@ -51,7 +51,7 @@ class Rp2kDataModule(pl.LightningDataModule):
         super().__init__()
         self.num_workers = num_workers
         self.batch_size = batch_size
-        self.root = data_dir
+        self.root = data_dir + '/rp2k_dataset'
 
     def get_transform(self, normalize=True, to_tensor=True):
         """Return the image transformation for the given dataset type.
