@@ -113,8 +113,10 @@ class RecognitionModel(pl.LightningModule):
         loss = self.loss(out, labels)
 
         labels = labels.cpu().numpy()
+        accuracy = self.accuracy(out, labels)
         
         self.log("loss_validation", loss, on_step=True, on_epoch=True)
+        self.log("accuaracy_validation", accuracy, on_step=False, on_epoch=True)
         return loss
 
     def configure_optimizers(self):

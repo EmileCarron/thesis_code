@@ -76,7 +76,8 @@ class Rp2kDataModule(pl.LightningDataModule):
         train_tfm = self.get_transform()
         if stage == 'fit' or stage is None:
             self.train_set = RP2KDataset(data_root = self.root, transforms = train_tfm)
-            self.train_set, self.val_set = torch.utils.data.random_split(self.train_set, [8000, len(self.train_set)-8000])
+            #self.train_set, self.val_set = torch.utils.data.random_split(self.train_set, [8000, len(self.train_set)-8000])
+            self.val_set = RP2KDataset(data_root = self.root, transforms = train_tfm, phase = 'val')
             
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size = self.batch_size, num_workers = self.num_workers)
