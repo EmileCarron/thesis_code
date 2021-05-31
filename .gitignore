@@ -1,4 +1,13 @@
+/__pycache__
+/detectie/__pycache__
+/detectie/lightning_logs
+debug.py
+.*
+/detectie/__pycache__/*
+/detectie/wandb
+
 .DS_Store
 detection_embedding/wandb
 detection_embedding/__pycache__
+
 
