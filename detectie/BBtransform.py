@@ -8,7 +8,10 @@ from PIL import Image
 import cv2
 
 class BBtrans(Dataset):
-      
+
+    #This function is used for checking wrong placed coordinates in the annotation file
+    #Otherwise there will be problemes with the albumentations transformations
+
     def __call__(self, target, size):
         size1 = size["size"][0]
         w = size["size"][0][0]
