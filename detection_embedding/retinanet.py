@@ -29,7 +29,7 @@ import wandb
 from collections import OrderedDict
 from typing import Dict, List, Tuple, Optional
 from torch import nn, Tensor
-#import tensorflow as tf
+
 
 model_urls = {
     'retinanet_resnet50_fpn_coco':
