@@ -27,7 +27,7 @@ SAMPLE_DATA_URL = {
     'json': BASE_URL + "AliProducts_train_sample.json"
 }
 
-
+#Data module for Prod10k dataset
 class Prod10kDataModule(pl.LightningDataModule):
     def __init__(self):
         super().__init__()
@@ -46,6 +46,7 @@ class Prod10kDataModule(pl.LightningDataModule):
     def val_dataloader(self):
         return DataLoader(self.val_set, batch_size = self.batch_size, num_workers = args.num_workers)
 
+#Data module for RP2k dataset
 class Rp2kDataModule(pl.LightningDataModule):
     def __init__(self, data_dir, batch_size, num_workers):
         super().__init__()
@@ -84,7 +85,8 @@ class Rp2kDataModule(pl.LightningDataModule):
         
     def val_dataloader(self):
         return DataLoader(self.val_set, batch_size = self.batch_size, num_workers = self.num_workers)
-     
+ 
+#Data module for RP2k dataset    
 class AliproductsDataModule(pl.LightningDataModule):
     def __init__(self, data_dir, batch_size, num_workers):
         super().__init__()
@@ -163,9 +165,7 @@ if __name__ == '__main__':
     parser.add_argument('--optim', type=str, default='SGD')
     parser.add_argument('--loss', type=str, default= 'CrossEntropy',
                             help='The name of the loss function to use.',
-                            choices=['CrossEntropy', 'ArcFace',
-                                     'TripletMargin', 'ContrastiveLoss',
-                                     'CircleLoss', 'LargeMarginSoftmaxLoss'])
+                            choices=['CrossEntropy'])
     parser.add_argument('--embedding_size', type=int, default=512)
     parser.add_argument('--checkpoint', type=str, default='')
     

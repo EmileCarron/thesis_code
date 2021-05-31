@@ -13,7 +13,6 @@ from torchvision.models import resnet, resnet18
 from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
 from pytorch_metric_learning import losses
 import wandb
-#import pdb; pdb.set_trace()
 
 
 class RecognitionModel(pl.LightningModule):
@@ -23,7 +22,7 @@ class RecognitionModel(pl.LightningModule):
         #ckpt = '../../../Masterproef/thesis_code/recognition/wandb/run-20210409_112741-28fdpx5s/files/thesis/28fdpx5s/checkpoints/epoch=299-step=18899.ckpt' 
         
         self.model = torchvision.models.resnet18(pretrained=True)
-        self.model.fc = nn.Linear(512, 2378, True)
+        self.model.fc = nn.Linear(512, 2378, True) #Change fully connected layer to 2379 output
         self.args = args
 
         self.extractor = torch.nn.Sequential(
@@ -38,6 +37,7 @@ class RecognitionModel(pl.LightningModule):
                 list(self.model.named_children())[-1:]
             )
         )
+        #Enkel CrossEntropy loss werkt momenteel
 
         if self.args.loss == 'CrossEntropy':
             self.loss = torch.nn.CrossEntropyLoss()
@@ -79,7 +79,6 @@ class RecognitionModel(pl.LightningModule):
 
 
     def accuracy(self, logits, labels):
-        import pdb; pdb.set_trace()
         _, predicted = torch.max(logits.data, 1)
         correct = (predicted == labels).sum().item()
         accuracy = correct / len(labels)
@@ -88,8 +87,6 @@ class RecognitionModel(pl.LightningModule):
 
 
     def training_step(self, batch, batch_idx):
-        #import pdb; pdb.set_trace()
-
         x, labels = batch
         out = torch.squeeze(self(x))
         
@@ -105,7 +102,6 @@ class RecognitionModel(pl.LightningModule):
         return loss
           
     def validation_step(self, batch, batch_idx):
-        #import pdb; pdb.set_trace()
         x, labels = batch
         
         if self.loss_requires_classifier:
@@ -115,10 +111,8 @@ class RecognitionModel(pl.LightningModule):
         loss = self.loss(out, labels)
 
         labels = labels.cpu().numpy()
-        #accuracy = self.accuracy(out, labels)
         
         self.log("loss_validation", loss, on_step=True, on_epoch=True)
-        #self.log("accuaracy_validation", accuracy, on_step=False, on_epoch=True)
         return loss
 
     def configure_optimizers(self):
