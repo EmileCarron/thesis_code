@@ -42,60 +42,6 @@ def _sum(x: List[Tensor]) -> Tensor:
         res = res + i
     return res
 
-class HeadJDE(RetinaNetHead):
-    def __init__(self, in_channels, num_anchors, num_classes, args):
-        super().__init__(in_channels, num_anchors, num_classes)
-        self.args = args
-        self.classification_head = RetinaNetClassificationHead(in_channels, num_anchors, num_classes)
-        self.regression_head = RetinaNetRegressionHead(in_channels, num_anchors)
-        #self.embedding_head = RetinaNetEmbeddingHead(in_channels, num_anchors, args.embedding_size, self.args)
-
-    def compute_loss(self, targets, head_outputs, anchors, matched_idxs):
-        # type: (List[Dict[str, Tensor]], Dict[str, Tensor], List[Tensor], List[Tensor]) -> Dict[str, Tensor]
-        return {
-            'classification': self.classification_head.compute_loss(targets, head_outputs, matched_idxs),
-            'bbox_regression': self.regression_head.compute_loss(targets, head_outputs, anchors, matched_idxs),
-            #'embedding': self.embedding_head.compute_loss(targets, head_outputs, matched_idxs),
-        }
-
-    def forward(self, x):
-        # type: (List[Tensor]) -> Dict[str, Tensor]
-        return {
-            'cls_logits': self.classification_head(x),
-            'bbox_regression': self.regression_head(x),
-            #'embedding': self.embedding_head(x),
-        }
-
-class RetinaNetEmbeddingHead(RetinaNetClassificationHead):
-    def __init__(self, in_channels, num_anchors, num_classes, args, prior_probability=0.01):
-        super().__init__(in_channels, num_anchors, num_classes, prior_probability=0.01) 
-        self.args = args
-        self.cos = CosineSimilarity()
-
-    def compute_loss(self, targets, head_outputs, matched_idxs):
-        
-        # type: (List[Dict[str, Tensor]], Dict[str, Tensor], List[Tensor]) -> Tensor
-        losses = []
-
-        cls_logits = head_outputs['embedding']
-
-        for targets_per_image, cls_logits_per_image, matched_idxs_per_image in zip(targets, cls_logits, matched_idxs):
-            # determine only the foreground
-            foreground_idxs_per_image = matched_idxs_per_image >= 0
-            num_foreground = foreground_idxs_per_image.sum()
-
-            # create the target classification
-            gt_classes_target = torch.zeros_like(cls_logits_per_image)
-            gt_classes_target[foreground_idxs_per_image, targets_per_image['labels'][matched_idxs_per_image[foreground_idxs_per_image]]] = 1.0
-
-            # find indices for which anchors should be ignored
-            valid_idxs_per_image = matched_idxs_per_image != self.BETWEEN_THRESHOLDS
-
-            # compute the classification loss
-            losses.append(sigmoid_focal_loss(cls_logits_per_image[valid_idxs_per_image],gt_classes_target[valid_idxs_per_image],reduction='sum',) / max(1, num_foreground))
-
-        return _sum(losses) / len(targets)
-
 class RetinaNetEmbedding(RetinaNet):
     def __init__(self, backbone, num_classes,
                  # transform parameters
@@ -127,14 +73,18 @@ class RetinaNetEmbedding(RetinaNet):
         # type: (Dict[str, Tensor], List[Dict[str, Tensor]]) -> Tuple[Dict[str, Tensor], List[Dict[str, Tensor]]]
         if self.training:
             return losses
-
+        # Adding losses to the return when in validation loop
         return detections, losses
 
     def postprocess_detections(self, head_outputs, anchors, image_shapes):
             # type: (Dict[str, List[Tensor]], List[List[Tensor]], List[Tuple[int, int]]) -> List[Dict[str, Tensor]]
+
+            # modified so that an extra output with the embedding for each detection is returned
+
+
         class_logits = head_outputs['cls_logits']
         box_regression = head_outputs['bbox_regression']
-        #costum_embedding = head_outputs['embedding']
+        
 
         num_images = len(image_shapes)
 
@@ -144,13 +94,12 @@ class RetinaNetEmbedding(RetinaNet):
             box_regression_per_image = [br[index] for br in box_regression]
             logits_per_image = [cl[index] for cl in class_logits]
             anchors_per_image, image_shape = anchors[index], image_shapes[index]
-            #custom_embedding_per_image = [emb[index] for emb in costum_embedding]
 
             image_boxes = []
             image_scores = []
             image_labels = []
+            # Adding an array for the embeddings
             image_embedding = []
-            #image_custom_embedding = []
 
             for box_regression_per_level, logits_per_level, anchors_per_level in \
                     zip(box_regression_per_image, logits_per_image, anchors_per_image):
@@ -166,9 +115,11 @@ class RetinaNetEmbedding(RetinaNet):
                 num_topk = min(self.topk_candidates, topk_idxs.size(0))
                 scores_per_level, idxs = scores_per_level.topk(num_topk)
                 topk_idxs = topk_idxs[idxs]
+
+                # calculating the right index of the logits_per_level array with the topk_idxs and the num_classes
                 indxembd = torch.div(idxs, num_classes, rounding_mode='floor')
+                # Saving the embedding from index indexemb
                 embeddings_per_level = logits_per_level[indxembd]
-                #custom_embedding_per_level = custom_embedding_per_level[indxembd]
 
                 anchor_idxs = torch.div(topk_idxs, num_classes, rounding_mode='floor')
                 labels_per_level = topk_idxs % num_classes
@@ -180,14 +131,15 @@ class RetinaNetEmbedding(RetinaNet):
                 image_boxes.append(boxes_per_level)
                 image_scores.append(scores_per_level)
                 image_labels.append(labels_per_level)
+                # Adding the embeddings_per_level to the embedding array 
                 image_embedding.append(embeddings_per_level)
-                #image_custom_embedding.append(custom_embedding_per_level)
+                
 
             image_boxes = torch.cat(image_boxes, dim=0)
             image_scores = torch.cat(image_scores, dim=0)
             image_labels = torch.cat(image_labels, dim=0)
             image_embedding = torch.cat(image_embedding, dim=0)
-            #image_custom_embedding = torch.cat(image_custom_embedding, dim=0)
+            
 
             # non-maximum suppression
             keep = box_ops.batched_nms(image_boxes, image_scores, image_labels, self.nms_thresh)
@@ -197,8 +149,9 @@ class RetinaNetEmbedding(RetinaNet):
                 'boxes': image_boxes[keep],
                 'scores': image_scores[keep],
                 'labels': image_labels[keep],
+                # returning the embeddings inside the detections dict
                 'embeddings': image_embedding[keep],
-                #'custom_embedding': image_custom_embedding[keep],
+                
             })
 
         return detections
@@ -299,6 +252,7 @@ class RetinaNetEmbedding(RetinaNet):
             # compute the detections
             detections = self.postprocess_detections(split_head_outputs, split_anchors, images.image_sizes)
             detections = self.transform.postprocess(detections, images.image_sizes, original_image_sizes)
+            # Calculation the loss in the validation loop
             losses = self.compute_loss(targets, head_outputs, anchors)
 
         if torch.jit.is_scripting():
@@ -392,26 +346,28 @@ class RetinaNetLightning(pl.LightningModule):
             anchor_sizes, aspect_ratios
             )
         self.anchor_generator = anchor_generator
-        self.backbone = self.backbone1(True)
-        self.head = HeadJDE(self.backbone.out_channels, self.anchor_generator.num_anchors_per_location()[0], 2378, self.args)
-        self.model = RetinaNetEmbedding(self.backbone, num_classes = 2378, head= self.head)  
+        self.backbone = self.get_backbone(True)
+        self.model = RetinaNetEmbedding(self.backbone, num_classes = 2378)  
         self.save_hyperparameters()
-        self.teacher_model = self.teacher(args)
+        self.teacher_model = self.get_teacher(args)
         self.tm_full = self.teacher_model.get_model()
-        self.tm_extractor = self.teacher_model.get_extractor()
         self.data_dir = args.data_dir
 
         if self.args.loss == 'CrossEntropy':
             self.loss = torch.nn.CrossEntropyLoss()
             self.loss_requires_classifier = True
 
-    def teacher(self, args):
+    def get_teacher(self, args):
+        # Loading the teacher model
+
         teacher = RecognitionModel(args)
         teacher_model = teacher.load_from_checkpoint(checkpoint_path=args.checkpoint, args=args)
         return teacher_model
 
 
-    def backbone1(self, pretrained_backbone, pretrained=True, trainable_backbone_layers=None):
+    def get_backbone(self, pretrained_backbone, pretrained=True, trainable_backbone_layers=None):
+        # Get function for ResNet18 backbone 
+
         trainable_backbone_layers = _validate_trainable_layers(
         pretrained or pretrained_backbone, trainable_backbone_layers, 5, 3)
 
@@ -429,6 +385,7 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
         ]
         
+        # Changing bounding box coordinates to integers for the crop so we lose a little bit of accuracy here
         boxes = y[0]['boxes'].int()
         counter = 0
         for idx in boxes:
@@ -439,11 +396,14 @@ class RetinaNetLightning(pl.LightningModule):
             if width < 7:
                 width = 7
 
+            # Cropping each image 
             image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
+            # Send each crop trough the teacher network
             self.tm_full.eval()
-            #self.tm_extractor.eval()
             predictions = self.tm_full(image)
+            # Determine a label
             _, predicted = torch.max(predictions.data, 1)
+            # Saving the label
             y[0]['labels'][counter] = predicted 
             counter = counter + 1
 
@@ -462,6 +422,7 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l, e in zip(y['boxes'],y['labels'], y['embedding'])
         ]
 
+        # Changing bounding box coordinates to integers for the crop so we lose a little bit of accuracy here
         boxes = y[0]['boxes'].int()
         counter = 0
         for idx in boxes:
@@ -472,20 +433,22 @@ class RetinaNetLightning(pl.LightningModule):
             if width < 7:
                 width = 7
 
+            # Cropping each image 
             image = torchvision.transforms.functional.crop(x, idx[1], idx[0], height, width)
+            # Send each crop trough the teacher network
             self.tm_full.eval()
-            #self.tm_extractor.eval()
             predictions = self.tm_full(image)
+            # Determine a label
             _, predicted = torch.max(predictions.data, 1)
+            # Saving the label
             y[0]['labels'][counter] = predicted 
             counter = counter + 1
-        #import pdb; pdb.set_trace()
+
         detections, losses = self.model(x,y)
         
         tot = (losses['classification'] + losses['bbox_regression'])
         self.log("loss_validation_class", losses['classification'], on_step=False, on_epoch=True)
         self.log("loss_validation_bb", losses['bbox_regression'], on_step=False, on_epoch=True)
-        #self.log("loss_validation_embedding", losses['embedding'], on_step=False, on_epoch=True)
         self.log("loss_validation", tot, on_step=False, on_epoch=True)
         torch.cuda.empty_cache()
 
