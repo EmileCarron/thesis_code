@@ -24,51 +24,21 @@ from torch.nn import CosineEmbeddingLoss
 import wandb
 from collections import OrderedDict
 
-#import tensorflow as tf
 
 model_urls = {
     'retinanet_resnet50_fpn_coco':
         'https://download.pytorch.org/models/retinanet_resnet50_fpn_coco-eeacb38b.pth',
 }
+
+#Training a stock retinanet for comparing with our joint network
             
 class RetinaNetLightning(pl.LightningModule):
     def __init__(self, args):
         super().__init__()
-        #self.backbone.fc = nn.Linear(512, 2, True)
-        #self.model = models.detection.RetinaNet(self.backbone, num_classes = 195)
         self.model = models.detection.retinanet_resnet50_fpn(pretrained=True)
-        # state_dict = load_state_dict_from_url(model_urls['retinanet_resnet50_fpn_coco'],
-        #                                       progress=True)
-        # self.model.load_state_dict(state_dict)
-        # overwrite_eps(self.model, 0.0)
-        #self.bbone = torchvision.models.resnet18(pretrained=True)
-
-        #self.extractor = torch.nn.Sequential(
-        #    OrderedDict(
-        #        list(self.bbone.named_children())[:-1]
-        #    ),
-         
-        #)
-        #self.extractor.fc = nn.Linear(512, 195, True)
-
-        # anchor_sizes = tuple((x, int(x * 2 ** (1.0 / 3)), int(x * 2 ** (2.0 / 3))) for x in [32, 64, 128, 256, 512])
-        # aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
-        # anchor_generator = AnchorGenerator(
-        #     anchor_sizes, aspect_ratios
-        #     )
-
-        # self.backbone = self.backbone1(False)
-        # # put the pieces together inside a RetinaNet model
-        # self.model = models.detection.RetinaNet(self.backbone, num_classes = 2)
-
         self.args = args
         self.save_hyperparameters()
-        #self.teacher_model = self.teacher(args)
-        #self.tm = self.teacher_model.get_model()
         self.data_dir = args.data_dir
-        #self.teacher_model.train(False)
-
-
         
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -89,8 +59,6 @@ class RetinaNetLightning(pl.LightningModule):
         for b, l in zip(y['boxes'],y['labels'])
         ]
 
-
-        import pdb; pdb.set_trace()
         detections = self.model(x,y)
         scores = detections[0]['scores']
         length = scores.size()[0]
