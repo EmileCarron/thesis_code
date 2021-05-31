@@ -35,6 +35,8 @@ import numpy as np
 from bs4 import BeautifulSoup
 import pandas as pd
 
+# This code requires a checkpoint from
+
 class RecognitionModel(pl.LightningModule):
     def __init__(self,args):
         super().__init__()
