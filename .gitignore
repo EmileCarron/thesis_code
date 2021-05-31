@@ -11,3 +11,9 @@ debug.py
 /herkenning/recognition/wandb
 /.DS_Store
 /recognition/wandb
+/detectie/__pycache__/*
+/detectie/wandb
+.DS_Store
+detection_embedding/wandb
+detection_embedding/__pycache__
+
