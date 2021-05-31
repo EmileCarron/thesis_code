@@ -2,12 +2,18 @@
 /detectie/__pycache__
 /detectie/lightning_logs
 debug.py
-.*
 /detectie/__pycache__/*
 /detectie/wandb
-
+/*/__pycache__/*
+*/.DS_Store
+/herkenning/recognition/__pycache__/
+/herkenning/recognition/lightning_logs/
+/herkenning/recognition/wandb
+/.DS_Store
+/recognition/wandb
+/detectie/__pycache__/*
+/detectie/wandb
 .DS_Store
 detection_embedding/wandb
 detection_embedding/__pycache__
-
 
