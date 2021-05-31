@@ -79,10 +79,11 @@ class RecognitionModel(pl.LightningModule):
 
 
     def accuracy(self, logits, labels):
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         _, predicted = torch.max(logits.data, 1)
         correct = (predicted == labels).sum().item()
         accuracy = correct / len(labels)
+    
         return torch.tensor(accuracy)
 
 
@@ -104,6 +105,7 @@ class RecognitionModel(pl.LightningModule):
         return loss
           
     def validation_step(self, batch, batch_idx):
+        #import pdb; pdb.set_trace()
         x, labels = batch
         
         if self.loss_requires_classifier:
@@ -113,10 +115,10 @@ class RecognitionModel(pl.LightningModule):
         loss = self.loss(out, labels)
 
         labels = labels.cpu().numpy()
-        accuracy = self.accuracy(out, labels)
+        #accuracy = self.accuracy(out, labels)
         
         self.log("loss_validation", loss, on_step=True, on_epoch=True)
-        self.log("accuaracy_validation", accuracy, on_step=False, on_epoch=True)
+        #self.log("accuaracy_validation", accuracy, on_step=False, on_epoch=True)
         return loss
 
     def configure_optimizers(self):
