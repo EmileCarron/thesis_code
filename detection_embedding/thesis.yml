@@ -1,4 +1,0 @@
-name: thesis
-channels:
-  - defaults
-prefix: /Users/emilecarron/opt/anaconda3/envs/thesis
